@@ -17,6 +17,7 @@ const uiSlice = createSlice({
         isDarkMode: safeParse("tz_dark_mode", false),
         view: "HOME",
         activeCategory: "All",
+        activeBrand: "All",
         searchQuery: "",
         toast: null,
         isCartOpen: false,
@@ -34,6 +35,9 @@ const uiSlice = createSlice({
         setActiveCategory: (state, action) => {
             state.activeCategory = action.payload;
         },
+        setActiveBrand: (state, action) => {
+            state.activeBrand = action.payload;
+        },
         setSearchQuery: (state, action) => {
             state.searchQuery = action.payload;
         },
@@ -50,7 +54,7 @@ const uiSlice = createSlice({
 });
 
 export const {
-    setDarkMode, setView, setActiveCategory, setSearchQuery,
+    setDarkMode, setView, setActiveCategory, setActiveBrand, setSearchQuery,
     setToast, toggleCart, toggleWishlistDrawer
 } = uiSlice.actions;
 

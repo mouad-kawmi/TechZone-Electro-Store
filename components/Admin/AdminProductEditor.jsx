@@ -1,9 +1,33 @@
 
 import React from 'react';
-import { X, Sparkles, Zap, Settings, Trash2, Save, Image as ImageIcon, Box, ListTodo, Info } from 'lucide-react';
+import { X, Sparkles, Zap, Settings, Trash2, Save, Image as ImageIcon, Box, ListTodo, Info, ChevronDown, ChevronRight } from 'lucide-react';
 
-const AdminProductEditor = ({ isOpen, product, onClose, onSave, onUpdateField, onAddSpec, onRemoveSpec }) => {
+const AdminProductEditor = ({ isOpen, product, allProducts, onClose, onSave, onUpdateField, onAddSpec, onRemoveSpec }) => {
     const fileInputRef = React.useRef(null);
+    const [catQuery, setCatQuery] = React.useState('');
+    const [brandQuery, setBrandQuery] = React.useState('');
+    const [showCatSuggestions, setShowCatSuggestions] = React.useState(false);
+    const [showBrandSuggestions, setShowBrandSuggestions] = React.useState(false);
+
+    // Dynamic Lists
+    const existingCats = React.useMemo(() => {
+        return [...new Set((allProducts || []).map(p => p.category).filter(Boolean))].sort();
+    }, [allProducts]);
+
+    const existingBrandsForCat = React.useMemo(() => {
+        if (!product?.category) return [];
+        return [...new Set((allProducts || [])
+            .filter(p => p.category === product.category)
+            .map(p => p.brand)
+            .filter(Boolean))].sort();
+    }, [allProducts, product?.category]);
+
+    React.useEffect(() => {
+        if (product) {
+            setCatQuery(product.category || '');
+            setBrandQuery(product.brand || '');
+        }
+    }, [product?.id, isOpen]);
 
     if (!isOpen || !product) return null;
 
@@ -21,27 +45,27 @@ const AdminProductEditor = ({ isOpen, product, onClose, onSave, onUpdateField, o
     return (
         <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 lg:p-6 transition-all duration-500">
             <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-2xl animate-fade-in" onClick={onClose} />
-            <div className="relative w-full max-w-5xl bg-white/95 dark:bg-slate-900/95 border border-white/20 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[85vh] lg:h-[80vh] animate-fade-up selection:bg-blue-600/20 selection:text-blue-600">
+            <div className="relative w-full max-w-5xl bg-white/95 dark:bg-slate-900/95 border border-white/20 dark:border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[90vh] lg:h-[80vh] animate-fade-up selection:bg-blue-600/20 selection:text-blue-600">
 
                 {/* Elite Modal Header */}
-                <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-950/20 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center backdrop-blur-md shrink-0">
-                    <div className="flex items-center gap-4">
-                        <div className="size-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-xl shadow-blue-600/30 group">
-                            <Sparkles className="size-5 group-hover:rotate-12 transition-transform" />
+                <div className="px-5 lg:px-6 py-4 bg-slate-50/50 dark:bg-slate-950/20 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center backdrop-blur-md shrink-0">
+                    <div className="flex items-center gap-3 lg:gap-4">
+                        <div className="size-9 lg:size-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-xl shadow-blue-600/30 group">
+                            <Sparkles className="size-4 lg:size-5 group-hover:rotate-12 transition-transform" />
                         </div>
                         <div>
-                            <h3 className="text-xl font-black uppercase tracking-tighter dark:text-white font-display leading-none">
+                            <h3 className="text-lg lg:text-xl font-black uppercase tracking-tighter dark:text-white font-display leading-none">
                                 {product.id ? 'Modifier Elite' : 'Nouveau Elite'}
                             </h3>
-                            <p className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mt-1">Product Configuration Module</p>
+                            <p className="text-[8px] lg:text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mt-1">Product Configuration Module</p>
                         </div>
                     </div>
-                    <button onClick={onClose} className="group size-10 flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:bg-rose-500 hover:text-white rounded-xl transition-all shadow-sm">
+                    <button onClick={onClose} className="group size-9 lg:size-10 flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:bg-rose-500 hover:text-white rounded-xl transition-all shadow-sm">
                         <X className="size-4 group-hover:rotate-90 transition-transform" />
                     </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 lg:p-8 space-y-8 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto p-5 lg:p-8 space-y-8 custom-scrollbar">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
                         {/* Information Columns */}
@@ -56,13 +80,111 @@ const AdminProductEditor = ({ isOpen, product, onClose, onSave, onUpdateField, o
                                     <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 font-display">Informations l-Baqi (Essentials)</h4>
                                 </div>
 
-                                <div className="space-y-3 group">
-                                    <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-3">Elite Product Title</label>
-                                    <input
-                                        value={product.title} onChange={e => onUpdateField('title', e.target.value)}
-                                        className="w-full h-12 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-blue-600 rounded-xl px-5 text-sm font-black outline-none dark:text-white transition-all focus:bg-white dark:focus:bg-slate-900"
-                                        placeholder="Ex: iPhone 16 Pro Max Ultra..."
-                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                                    <div className="md:col-span-12 lg:col-span-4 space-y-3 group">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-3">Elite Product Title</label>
+                                        <input
+                                            value={product.title} onChange={e => onUpdateField('title', e.target.value)}
+                                            className="w-full h-12 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-blue-600 rounded-xl px-5 text-sm font-black outline-none dark:text-white transition-all focus:bg-white dark:focus:bg-slate-900"
+                                            placeholder="Ex: iPhone 16 Pro Max..."
+                                        />
+                                    </div>
+
+                                    {/* Smart Category Selection */}
+                                    <div className="md:col-span-6 lg:col-span-4 space-y-3 relative">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-3">Catégorie</label>
+                                        <div className="relative group/field">
+                                            <input
+                                                value={catQuery}
+                                                onChange={e => {
+                                                    setCatQuery(e.target.value);
+                                                    onUpdateField('category', e.target.value);
+                                                    setShowCatSuggestions(true);
+                                                }}
+                                                onFocus={() => setShowCatSuggestions(true)}
+                                                onBlur={() => setTimeout(() => setShowCatSuggestions(false), 200)}
+                                                className="w-full h-12 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-blue-600 rounded-xl px-5 text-sm font-black outline-none dark:text-white transition-all focus:bg-white dark:focus:bg-slate-900 pr-10"
+                                                placeholder="Saisir ou choisir..."
+                                            />
+                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-hover/field:text-blue-600 transition-colors pointer-events-none" />
+
+                                            {showCatSuggestions && (
+                                                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl z-[600] overflow-hidden max-h-48 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                                                    {(catQuery === product.category || !catQuery ? existingCats : existingCats.filter(c => c.toLowerCase().includes(catQuery.toLowerCase()))).map(cat => (
+                                                        <button
+                                                            key={cat}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                onUpdateField('category', cat);
+                                                                setCatQuery(cat);
+                                                                setShowCatSuggestions(false);
+                                                            }}
+                                                            className={`w-full text-left px-5 py-3 text-xs font-black uppercase transition-all flex items-center justify-between group/item ${cat === product.category ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                                                        >
+                                                            {cat}
+                                                            <ChevronRight className={`size-3 transition-all ${cat === product.category ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0'}`} />
+                                                        </button>
+                                                    ))}
+                                                    {catQuery && !existingCats.includes(catQuery) && (
+                                                        <div className="px-5 py-3 text-[10px] font-black text-blue-600 bg-blue-50/50 dark:bg-blue-500/10 italic border-t border-slate-100 dark:border-slate-800">
+                                                            + Ajouter "{catQuery}"
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Smart Brand Selection */}
+                                    <div className="md:col-span-6 lg:col-span-4 space-y-3 relative">
+                                        <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-3">Marque (Brand)</label>
+                                        <div className="relative group/field">
+                                            <input
+                                                value={brandQuery}
+                                                onChange={e => {
+                                                    setBrandQuery(e.target.value);
+                                                    onUpdateField('brand', e.target.value);
+                                                    setShowBrandSuggestions(true);
+                                                }}
+                                                onFocus={() => setShowBrandSuggestions(true)}
+                                                onBlur={() => setTimeout(() => setShowBrandSuggestions(false), 200)}
+                                                className="w-full h-12 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:border-blue-600 rounded-xl px-5 text-sm font-black outline-none dark:text-white transition-all focus:bg-white dark:focus:bg-slate-900 pr-10"
+                                                placeholder={product.category ? `Marques ${product.category}...` : "Saisir ou choisir..."}
+                                            />
+                                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 size-4 text-slate-400 group-hover/field:text-blue-600 transition-colors pointer-events-none" />
+
+                                            {showBrandSuggestions && (
+                                                <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-2xl z-[600] overflow-hidden max-h-48 overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
+                                                    {(brandQuery === product.brand || !brandQuery ? existingBrandsForCat : existingBrandsForCat.filter(b => b.toLowerCase().includes(brandQuery.toLowerCase()))).map(brand => (
+                                                        <button
+                                                            key={brand}
+                                                            type="button"
+                                                            onClick={() => {
+                                                                onUpdateField('brand', brand);
+                                                                setBrandQuery(brand);
+                                                                setShowBrandSuggestions(false);
+                                                            }}
+                                                            className={`w-full text-left px-5 py-3 text-xs font-black uppercase transition-all flex items-center justify-between group/item ${brand === product.brand ? 'bg-blue-600 text-white' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
+                                                        >
+                                                            {brand}
+                                                            <ChevronRight className={`size-3 transition-all ${brand === product.brand ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0'}`} />
+                                                        </button>
+                                                    ))}
+                                                    {brandQuery && !existingBrandsForCat.includes(brandQuery) && (
+                                                        <div className="px-5 py-3 text-[10px] font-black text-blue-600 bg-blue-50/50 dark:bg-blue-500/10 italic border-t border-slate-100 dark:border-slate-800">
+                                                            + Ajouter "{brandQuery}" {product.category ? `dans ${product.category}` : ''}
+                                                        </div>
+                                                    )}
+                                                    {existingBrandsForCat.length === 0 && !brandQuery && (
+                                                        <div className="px-5 py-4 text-center">
+                                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Aucune marque trouvée</p>
+                                                            <p className="text-[8px] font-black text-slate-300 uppercase mt-1">Saisissez-en une nouvelle</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -143,7 +265,7 @@ const AdminProductEditor = ({ isOpen, product, onClose, onSave, onUpdateField, o
                                 <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 ml-3 font-display">Aperçu Elite Image</label>
                                 <div className="bg-slate-50 dark:bg-slate-950/20 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 flex items-center justify-center aspect-video sm:aspect-square md:aspect-video xl:aspect-square relative group overflow-hidden shadow-inner">
                                     {product.image ? (
-                                        <img src={product.image} className="h-full w-full object-contain group-hover:scale-110 transition-transform duration-1000" alt="Preview" />
+                                        <img src={product.image || null} className="h-full w-full object-contain group-hover:scale-110 transition-transform duration-1000" alt="Preview" />
                                     ) : (
                                         <div className="flex flex-col items-center gap-4 text-slate-300 dark:text-slate-700">
                                             <ImageIcon className="size-10 stroke-1" />
@@ -231,23 +353,23 @@ const AdminProductEditor = ({ isOpen, product, onClose, onSave, onUpdateField, o
                 </div>
 
                 {/* Final Actions Footer */}
-                <div className="px-6 py-4 bg-slate-50/50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex justify-end items-center gap-4 backdrop-blur-md shrink-0">
+                <div className="px-5 lg:px-6 py-4 bg-slate-50/50 dark:bg-slate-950/20 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-end items-center gap-3 lg:gap-4 backdrop-blur-md shrink-0">
                     <div className="mr-auto text-[8px] font-black text-slate-400 uppercase tracking-widest hidden md:flex items-center gap-2">
                         <div className="size-1.5 bg-emerald-500 rounded-full"></div>
                         Ready to Update Elite Catalog
                     </div>
                     <button
                         onClick={onClose}
-                        className="px-6 py-3 rounded-xl text-[9px] font-black uppercase text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all tracking-widest"
+                        className="w-full sm:w-auto px-6 py-3 rounded-xl text-[9px] font-black uppercase text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all tracking-widest order-2 sm:order-1"
                     >
-                        Annuler Modifications
+                        Annuler
                     </button>
                     <button
                         onClick={onSave}
-                        className="relative group h-12 px-8 bg-slate-900 dark:bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all font-display shadow-xl shadow-slate-900/10 dark:shadow-blue-600/20"
+                        className="w-full sm:w-auto relative group h-12 px-8 bg-slate-900 dark:bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all font-display shadow-xl shadow-slate-900/10 dark:shadow-blue-600/20 order-1 sm:order-2"
                     >
                         <Save className="size-4 group-hover:-translate-y-0.5 transition-transform" />
-                        Sauvegarder l-Produit
+                        Sauvegarder
                     </button>
                 </div>
             </div>

@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Search, SlidersHorizontal, ArrowLeft, LayoutGrid, X } from 'lucide-react';
-import ProductCard from '../components/ProductCard';
-import Breadcrumbs from '../components/Breadcrumbs';
-import EmptyState from '../components/EmptyState';
+import ProductCard from '../components/Product/ProductCard';
+import Breadcrumbs from '../components/Layout/Breadcrumbs';
+import EmptyState from '../components/UI/EmptyState';
 
 const SearchResultsView = ({
     query,
@@ -44,10 +44,10 @@ const SearchResultsView = ({
             <div className="page-content bg-white dark:bg-slate-950 min-h-[60vh] flex flex-col items-center justify-center p-6">
                 <EmptyState
                     type="search"
-                    title="Wallah walo !"
-                    message={`Ma lqina 7ta chi natija l "${query}". Jereb chi kelma khra.`}
+                    title="Aucun résultat !"
+                    message={`Nous n'avons trouvé aucun résultat pour "${query}". Réessayez avec un autre mot-clé.`}
                     onAction={onBack}
-                    actionLabel="Raj3 Accueil"
+                    actionLabel="Retour à l'Accueil"
                 />
             </div>
         );

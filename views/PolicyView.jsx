@@ -113,7 +113,7 @@ const PolicyView = ({ type, onBack }) => {
                             className="group flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-all"
                         >
                             <ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
-                            Retour l-Accueil
+                            Retour à l'Accueil
                         </button>
                         <div className="flex items-center gap-6">
                             <div className={`size-16 rounded-2xl flex items-center justify-center border-2 ${colorClasses[current.color]}`}>
@@ -132,7 +132,7 @@ const PolicyView = ({ type, onBack }) => {
                         <div className="px-6 py-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-4 shadow-sm">
                             <Clock className="size-5 text-blue-600" />
                             <div>
-                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Ma-j dork</p>
+                                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Mis à jour</p>
                                 <p className="text-[10px] font-bold dark:text-white uppercase">Février 2026</p>
                             </div>
                         </div>

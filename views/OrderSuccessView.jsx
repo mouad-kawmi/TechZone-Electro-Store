@@ -1,6 +1,6 @@
 
 import React from 'react';
-import OrderSuccess from '../components/OrderSuccess';
+import OrderSuccess from '../components/Checkout/OrderSuccess';
 
 
 const OrderSuccessView = ({ onContinue, orderData, onTrack }) => {

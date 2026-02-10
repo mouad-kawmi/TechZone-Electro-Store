@@ -1,8 +1,13 @@
 
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { LayoutDashboard, ChevronRight, Package, Heart, Star } from 'lucide-react';
+import { toggleWishlistDrawer } from '../../store';
 
 const ProfileOverview = ({ user, onAdminClick, setActiveTab }) => {
+    const dispatch = useDispatch();
+    const { items: wishlistItems } = useSelector((state) => state.wishlist);
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
             {onAdminClick && (
@@ -87,25 +92,37 @@ const ProfileOverview = ({ user, onAdminClick, setActiveTab }) => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
-                <div className="bg-white rounded-[3rem] p-8 shadow-sm border border-slate-100 space-y-6">
+                <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-8 shadow-sm border border-slate-100 dark:border-slate-800 space-y-6">
                     <div className="flex items-center gap-4">
-                        <div className="size-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center">
+                        <div className="size-12 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 rounded-2xl flex items-center justify-center">
                             <Heart className="h-6 w-6" />
                         </div>
-                        <h4 className="text-sm font-black uppercase tracking-tighter">Ma Wishlist</h4>
+                        <h4 className="text-sm font-black uppercase tracking-tighter dark:text-white">Ma Wishlist</h4>
                     </div>
-                    <p className="text-xs text-slate-400 font-medium leading-relaxed">Vous avez 12 articles sauvegardés.</p>
-                    <button className="text-blue-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">Voir tout <ChevronRight className="h-3 w-3" /></button>
+                    <p className="text-xs text-slate-400 font-medium leading-relaxed">
+                        Vous avez {wishlistItems.length} article{wishlistItems.length !== 1 ? 's' : ''} sauvegardé{wishlistItems.length !== 1 ? 's' : ''}.
+                    </p>
+                    <button
+                        onClick={() => dispatch(toggleWishlistDrawer())}
+                        className="text-blue-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all"
+                    >
+                        Voir tout <ChevronRight className="h-3 w-3" />
+                    </button>
                 </div>
-                <div className="bg-white rounded-[3rem] p-8 shadow-sm border border-slate-100 space-y-6">
+                <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-8 shadow-sm border border-slate-100 dark:border-slate-800 space-y-6">
                     <div className="flex items-center gap-4">
-                        <div className="size-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
+                        <div className="size-12 bg-amber-50 dark:bg-amber-900/20 text-amber-600 rounded-2xl flex items-center justify-center">
                             <Star className="h-6 w-6" />
                         </div>
-                        <h4 className="text-sm font-black uppercase tracking-tighter">Points TechZone</h4>
+                        <h4 className="text-sm font-black uppercase tracking-tighter dark:text-white">Points TechZone</h4>
                     </div>
-                    <p className="text-xs text-slate-400 font-medium leading-relaxed">450 points cumulés.</p>
-                    <button className="text-amber-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">Gérer <ChevronRight className="h-3 w-3" /></button>
+                    <p className="text-xs text-slate-400 font-medium leading-relaxed">{user.points || 0} points cumulés.</p>
+                    <button
+                        onClick={() => setActiveTab('points')}
+                        className="text-amber-600 text-[10px] font-black uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all"
+                    >
+                        Gérer <ChevronRight className="h-3 w-3" />
+                    </button>
                 </div>
             </div>
         </div>

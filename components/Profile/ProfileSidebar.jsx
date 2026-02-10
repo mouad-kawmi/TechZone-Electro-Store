@@ -1,13 +1,17 @@
 
 import React from 'react';
+import { useSelector } from 'react-redux';
 import {
-    User, ShieldCheck, Clock, Package, MapPin, CreditCard, Settings, LogOut, ChevronRight
+    User, ShieldCheck, Clock, Package, MapPin, CreditCard, Settings, LogOut, ChevronRight, Star
 } from 'lucide-react';
 
 const ProfileSidebar = ({ user, activeTab, setActiveTab, onLogout }) => {
+    const { items: wishlistItems } = useSelector((state) => state.wishlist);
+
     const navItems = [
         { id: 'overview', label: "Dashboard", icon: Clock },
         { id: 'orders', label: "Commandes", icon: Package },
+        { id: 'points', label: "Points & Cadeaux", icon: Star },
         { id: 'addresses', label: "Adresses", icon: MapPin },
         { id: 'payments', label: "Paiements", icon: CreditCard },
         { id: 'settings', label: "Paramètres", icon: Settings }
@@ -28,7 +32,7 @@ const ProfileSidebar = ({ user, activeTab, setActiveTab, onLogout }) => {
 
                 <div className="grid grid-cols-2 gap-4 mt-8">
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                        <p className="text-xl font-black text-slate-900">12</p>
+                        <p className="text-xl font-black text-slate-900">{wishlistItems.length}</p>
                         <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Favoris</p>
                     </div>
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
@@ -44,8 +48,8 @@ const ProfileSidebar = ({ user, activeTab, setActiveTab, onLogout }) => {
                         key={item.id}
                         onClick={() => setActiveTab(item.id)}
                         className={`w-full flex items-center justify-between p-4 rounded-2xl transition-all group ${activeTab === item.id
-                                ? 'bg-slate-900 text-white shadow-lg'
-                                : 'text-slate-500 hover:bg-slate-50'
+                            ? 'bg-slate-900 text-white shadow-lg'
+                            : 'text-slate-500 hover:bg-slate-50'
                             }`}
                     >
                         <div className="flex items-center gap-4">

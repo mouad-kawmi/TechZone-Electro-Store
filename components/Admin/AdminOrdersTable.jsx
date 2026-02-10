@@ -73,9 +73,11 @@ const AdminOrdersTable = ({ orders = [], onStatusChange }) => {
                 </div>
             </div>
 
-            {/* Table */}
+            {/* Orders List Container */}
             <div className="bg-white dark:bg-slate-900/40 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.02)]">
-                <div className="overflow-x-auto no-scrollbar">
+
+                {/* Desktop Table View */}
+                <div className="hidden lg:block overflow-x-auto no-scrollbar">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="border-b border-slate-50 dark:border-slate-800">
@@ -155,51 +157,107 @@ const AdminOrdersTable = ({ orders = [], onStatusChange }) => {
                         </tbody>
                     </table>
                 </div>
-                {filteredOrders.length === 0 && (
-                    <div className="p-32 text-center">
-                        <div className="size-20 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-300">
-                            <ShoppingBag className="size-10" />
+
+                {/* Mobile/Tablet Card View */}
+                <div className="lg:hidden divide-y divide-slate-100 dark:divide-slate-800/50">
+                    {filteredOrders.map((order) => (
+                        <div key={order.id} className="p-6 space-y-4">
+                            <div className="flex items-start justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="size-10 rounded-xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                        <ShoppingBag className="size-5" />
+                                    </div>
+                                    <div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-mono font-black text-slate-900 dark:text-white uppercase tracking-tighter">#{order.id?.toString().slice(-8)}</span>
+                                            <div className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border text-[8px] font-black uppercase tracking-widest ${getStatusStyle(order.status)}`}>
+                                                {order.status || 'En Attente'}
+                                            </div>
+                                        </div>
+                                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{order.date}</p>
+                                    </div>
+                                </div>
+                                <div className="text-right">
+                                    <span className="text-sm font-black text-blue-600 dark:text-blue-400 tracking-tighter">{(order.finalTotal || order.amount || 0).toLocaleString()} DH</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between gap-4">
+                                <div className="flex flex-col">
+                                    <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">{order.name || order.customerName || 'Anonyme'}</span>
+                                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{order.email || 'no-email@tz.com'}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => setSelectedOrder(order)}
+                                        className="size-10 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400"
+                                    >
+                                        <Eye className="size-4" />
+                                    </button>
+                                    {order.status !== 'Livré' && (
+                                        <button
+                                            onClick={() => {
+                                                const nextStatus = order.status === 'En Attente' ? 'En Cours' :
+                                                    order.status === 'En Cours' ? 'Expédié' : 'Livré';
+                                                onStatusChange(order, nextStatus);
+                                            }}
+                                            className="px-4 h-10 bg-blue-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-600/20"
+                                        >
+                                            {order.status === 'En Attente' ? 'Process' :
+                                                order.status === 'En Cours' ? 'Expédier' : 'Livrer'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        <p className="text-[11px] font-black uppercase tracking-[0.4em] text-slate-400">Aucune commande trouvée</p>
+                    ))}
+                </div>
+
+                {filteredOrders.length === 0 && (
+                    <div className="py-20 lg:py-32 text-center px-6">
+                        <div className="size-16 lg:size-20 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-6 lg:mb-8 text-slate-300">
+                            <ShoppingBag className="size-8 lg:size-10" />
+                        </div>
+                        <p className="text-[10px] lg:text-[11px] font-black uppercase tracking-[0.4em] text-slate-400">Aucune commande trouvée</p>
                     </div>
                 )}
             </div>
 
             {/* Detailed Modal */}
             {selectedOrder && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-950/40 backdrop-blur-xl animate-fade-in">
-                    <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-[3.5rem] shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 max-h-[90vh] flex flex-col">
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 lg:p-6 bg-slate-950/40 backdrop-blur-xl animate-fade-in">
+                    <div className="bg-white dark:bg-slate-900 w-full max-w-4xl rounded-[2rem] lg:rounded-[3.5rem] shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 max-h-[95vh] lg:max-h-[90vh] flex flex-col">
                         {/* Header */}
-                        <div className="p-10 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
+                        <div className="p-6 lg:p-10 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
                             <div>
-                                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase font-display flex items-center gap-4">
+                                <h2 className="text-lg lg:text-2xl font-black text-slate-900 dark:text-white tracking-tighter uppercase font-display flex items-center gap-2 lg:gap-4">
                                     Détails l-Commande
                                     <span className="text-blue-600 font-mono">#{selectedOrder.id?.toString().slice(-8)}</span>
                                 </h2>
-                                <div className="flex items-center gap-4 mt-2">
-                                    <span className={`px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(selectedOrder.status)}`}>
+                                <div className="flex items-center gap-3 lg:gap-4 mt-2">
+                                    <span className={`px-3 lg:px-4 py-1 rounded-full text-[8px] lg:text-[9px] font-black uppercase tracking-widest border ${getStatusStyle(selectedOrder.status)}`}>
                                         {selectedOrder.status}
                                     </span>
-                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                    <span className="text-[9px] lg:text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
                                         <Clock className="size-3" /> {selectedOrder.date}
                                     </span>
                                 </div>
                             </div>
-                            <button onClick={() => setSelectedOrder(null)} className="size-14 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-rose-500 hover:text-white transition-all">
-                                <X className="size-6" />
+                            <button onClick={() => setSelectedOrder(null)} className="size-10 lg:size-14 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:bg-rose-500 hover:text-white transition-all">
+                                <X className="size-5 lg:size-6" />
                             </button>
                         </div>
 
                         {/* Content */}
-                        <div className="flex-1 overflow-y-auto p-10 space-y-12 no-scrollbar">
-                            <div className="grid md:grid-cols-2 gap-12">
+                        <div className="flex-1 overflow-y-auto p-6 lg:p-10 space-y-8 lg:space-y-12 no-scrollbar">
+                            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
                                 {/* Details Card */}
-                                <div className="space-y-8">
+                                <div className="space-y-6 lg:space-y-8">
                                     <div className="space-y-4">
                                         <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 flex items-center gap-2">
                                             <MapPin className="size-3 text-orange-500" /> Adresse de Livraison
                                         </h3>
-                                        <div className="p-8 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800">
+                                        <div className="p-6 lg:p-8 bg-slate-50 dark:bg-slate-800/50 rounded-2xl lg:rounded-3xl border border-slate-100 dark:border-slate-800">
                                             <p className="text-sm font-black text-slate-900 dark:text-white uppercase font-display mb-1">{selectedOrder.name || selectedOrder.customerName}</p>
                                             <p className="text-xs font-bold text-slate-500 leading-relaxed">{selectedOrder.address}, {selectedOrder.city}</p>
                                             <p className="text-xs font-bold text-slate-500 mt-2">{selectedOrder.phone}</p>
@@ -211,7 +269,7 @@ const AdminOrdersTable = ({ orders = [], onStatusChange }) => {
                                         <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 flex items-center gap-2">
                                             <CreditCard className="size-3 text-blue-500" /> Mode de Paiement
                                         </h3>
-                                        <div className="p-8 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800">
+                                        <div className="p-6 lg:p-8 bg-slate-50 dark:bg-slate-800/50 rounded-2xl lg:rounded-3xl border border-slate-100 dark:border-slate-800">
                                             <p className="text-sm font-black text-slate-900 dark:text-white uppercase font-display">
                                                 {selectedOrder.paymentMethod === 'cod' ? 'Cash on Delivery' :
                                                     selectedOrder.paymentMethod === 'card' ? 'Carte Bancaire' : 'PayPal'}
@@ -225,21 +283,25 @@ const AdminOrdersTable = ({ orders = [], onStatusChange }) => {
                                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 flex items-center gap-2">
                                         <ShoppingBag className="size-3 text-emerald-500" /> Articles Selectionnés
                                     </h3>
-                                    <div className="space-y-4">
+                                    <div className="space-y-3 lg:space-y-4">
                                         {selectedOrder.items?.map((item, idx) => (
-                                            <div key={idx} className="flex items-center gap-4 p-4 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl group hover:border-blue-500/30 transition-all">
-                                                <div className="size-16 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-900 p-2">
-                                                    <img src={item.image} alt="" className="size-full object-contain group-hover:scale-110 transition-transform duration-500" />
+                                            <div key={idx} className="flex items-center gap-4 p-3 lg:p-4 bg-white dark:bg-slate-950 border border-slate-100 dark:border-slate-800 rounded-2xl group hover:border-blue-500/30 transition-all">
+                                                <div className="size-12 lg:size-16 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-900 p-2 flex items-center justify-center">
+                                                    {item.image ? (
+                                                        <img src={item.image} alt={item.title} className="size-full object-contain group-hover:scale-110 transition-transform duration-500" />
+                                                    ) : (
+                                                        <ShoppingBag className="size-6 text-slate-300" />
+                                                    )}
                                                 </div>
                                                 <div className="flex-1">
-                                                    <h4 className="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-tight line-clamp-1">{item.name}</h4>
+                                                    <h4 className="text-[10px] lg:text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-tight line-clamp-1">{item.title}</h4>
                                                     <p className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{item.quantity} x {item.price.toLocaleString()} DH</p>
                                                 </div>
                                             </div>
                                         ))}
                                         {!selectedOrder.items && (
-                                            <div className="p-8 text-center bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
-                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Liste d'articles non disponible pour cette commande</p>
+                                            <div className="p-6 lg:p-8 text-center bg-slate-50 dark:bg-slate-800/30 rounded-2xl lg:rounded-3xl border border-dashed border-slate-200 dark:border-slate-700">
+                                                <p className="text-[9px] lg:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Liste d'articles non disponible pour cette commande</p>
                                             </div>
                                         )}
                                     </div>
@@ -248,10 +310,10 @@ const AdminOrdersTable = ({ orders = [], onStatusChange }) => {
                         </div>
 
                         {/* Footer */}
-                        <div className="p-10 bg-slate-50 dark:bg-slate-950 flex items-center justify-between border-t border-slate-100 dark:border-slate-800">
-                            <div className="space-y-1">
+                        <div className="p-6 lg:p-10 bg-slate-50 dark:bg-slate-950 flex flex-col sm:flex-row items-center justify-between gap-6 border-t border-slate-100 dark:border-slate-800">
+                            <div className="space-y-1 text-center sm:text-left">
                                 <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.2em]">Total Final</p>
-                                <h4 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter font-display">
+                                <h4 className="text-2xl lg:text-3xl font-black text-slate-900 dark:text-white tracking-tighter font-display">
                                     {(selectedOrder.finalTotal || selectedOrder.amount || 0).toLocaleString()} <span className="text-lg">DH</span>
                                 </h4>
                             </div>
@@ -259,7 +321,7 @@ const AdminOrdersTable = ({ orders = [], onStatusChange }) => {
                                 onClick={() => {
                                     window.print();
                                 }}
-                                className="px-10 h-14 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-black/10"
+                                className="w-full sm:w-auto px-10 h-14 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-600 transition-all shadow-xl shadow-black/10"
                             >
                                 Imprimer l'Facture
                             </button>

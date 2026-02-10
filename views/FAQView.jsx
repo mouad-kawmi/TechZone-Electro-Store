@@ -47,7 +47,7 @@ const FAQView = ({ onBack }) => {
                         className="group inline-flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-all mb-4"
                     >
                         <ArrowLeft className="size-4 group-hover:-translate-x-1 transition-transform" />
-                        Retour l-Accueil
+                        Retour à l'Accueil
                     </button>
                     <div className="flex items-center justify-center gap-4 mb-4">
                         <div className="size-12 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-600">
@@ -66,7 +66,7 @@ const FAQView = ({ onBack }) => {
                     <Search className="absolute left-6 top-1/2 -translate-y-1/2 size-5 text-slate-300 group-focus-within:text-blue-600 transition-colors" />
                     <input
                         type="text"
-                        placeholder="Jereb t-qleb 3la chi haja : 'Garantie'..."
+                        placeholder="Recherchez un sujet : 'Garantie'..."
                         className="w-full h-16 bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-[2rem] pl-16 pr-8 text-sm font-bold outline-none focus:border-blue-600 dark:text-white transition-all shadow-xl shadow-slate-900/5 placeholder:text-slate-300 font-display uppercase tracking-wider"
                     />
                 </div>
@@ -126,11 +126,11 @@ const FAQView = ({ onBack }) => {
                         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(37,99,235,0.1),transparent)] pointer-events-none"></div>
                         <div className="flex items-center justify-center gap-4">
                             <MessageSquare className="size-6 text-blue-500" />
-                            <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-display">Ma lqitich l-jawab ?</h3>
+                            <h3 className="text-2xl font-black text-white uppercase tracking-tighter font-display">Vous n'avez pas trouvé l'info ?</h3>
                         </div>
-                        <p className="text-slate-400 text-sm font-bold uppercase tracking-widest max-w-sm mx-auto">Hdar m-3ana directement f WhatsApp. On est là pour toi.</p>
+                        <p className="text-slate-400 text-sm font-bold uppercase tracking-widest max-w-sm mx-auto">Contactez-nous directement via WhatsApp. Nous sommes là pour vous.</p>
                         <button className="bg-blue-600 text-white px-12 py-5 rounded-2xl font-black text-[11px] uppercase tracking-widest hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20 active:scale-95">
-                            Chit-chat m-3a l-Expert
+                            Parler avec un Expert
                         </button>
                     </div>
                 </div>

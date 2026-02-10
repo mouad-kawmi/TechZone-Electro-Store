@@ -1,6 +1,6 @@
 
 import React from 'react';
-import AdminPanel from '../components/AdminPanel';
+import AdminPanel from '../components/Admin/AdminPanel';
 
 
 const AdminView = ({

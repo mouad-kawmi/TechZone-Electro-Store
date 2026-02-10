@@ -7,6 +7,8 @@ import compareReducer from "./slices/compareSlice.js";
 import authReducer from "./slices/authSlice.js";
 import ordersReducer from "./slices/ordersSlice.js";
 import messagesReducer from "./slices/messagesSlice.js";
+import bannerReducer from "./slices/bannerSlice.js";
+import settingsReducer from "./slices/settingsSlice.js";
 
 // Custom middleware to save cart to localStorage with debounce
 const cartMiddleware = store => next => action => {
@@ -30,7 +32,9 @@ export const store = configureStore({
         compare: compareReducer,
         auth: authReducer,
         orders: ordersReducer,
-        messages: messagesReducer
+        messages: messagesReducer,
+        banner: bannerReducer,
+        settings: settingsReducer
     },
     // middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(cartMiddleware)
 });
@@ -43,3 +47,5 @@ export * from "./slices/compareSlice.js";
 export * from "./slices/authSlice.js";
 export * from "./slices/ordersSlice.js";
 export * from "./slices/messagesSlice.js";
+export * from "./slices/bannerSlice.js";
+export * from "./slices/settingsSlice.js";

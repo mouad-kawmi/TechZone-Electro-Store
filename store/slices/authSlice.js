@@ -11,8 +11,19 @@ const safeParse = (key, fallback) => {
     }
 };
 
+const getInitialUser = () => {
+    const user = safeParse("tz_user", null);
+    if (user && !user.paymentMethods) {
+        // Add sample card if none exist
+        user.paymentMethods = [
+            { id: 1, type: 'Visa', last4: '4242', expiry: '12/25', isDefault: true, color: 'from-blue-600 to-indigo-700' }
+        ];
+    }
+    return user;
+};
+
 const initialState = {
-    user: safeParse("tz_user", null),
+    user: getInitialUser(),
     isLoggedIn: !!safeParse("tz_user", null),
     token: safeParse("tz_token", null),
     isLoading: false,

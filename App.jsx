@@ -5,14 +5,15 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 // Components
-import Header from './components/Header';
-import CartDrawer from './components/CartDrawer';
-import WishlistDrawer from './components/WishlistDrawer';
-import QuickViewModal from './components/QuickViewModal';
-import WhatsAppButton from './components/WhatsAppButton';
-import Footer from './components/Footer';
-import { SkeletonCard, SkeletonDetails } from './components/Skeleton';
-import { CheckCircle2, X } from 'lucide-react';
+import Header from './components/Layout/Header';
+import CartDrawer from './components/Checkout/CartDrawer';
+import WishlistDrawer from './components/Product/WishlistDrawer';
+import QuickViewModal from './components/Product/QuickViewModal';
+import WhatsAppButton from './components/Layout/WhatsAppButton';
+import Footer from './components/Layout/Footer';
+import { SkeletonCard, SkeletonDetails } from './components/UI/Skeleton';
+import About from './components/Pages/About';
+import { CheckCircle2, X, Info } from 'lucide-react';
 
 
 // Views
@@ -25,7 +26,8 @@ import OrderSuccessView from './views/OrderSuccessView.jsx';
 import LoginView from './views/LoginView.jsx';
 import ProfileView from './views/ProfileView.jsx';
 import AdminView from './views/AdminView.jsx';
-import CategoryView from './components/CategoryPage.jsx';
+import CategoryView from './components/Product/CategoryPage.jsx';
+import ReviewsPage from './components/Pages/ReviewsPage.jsx';
 import TrackingView from './views/TrackingView.jsx';
 import SearchResultsView from './views/SearchResultsView.jsx';
 import PolicyView from './views/PolicyView.jsx';
@@ -33,7 +35,7 @@ import FAQView from './views/FAQView.jsx';
 
 // Actions
 import {
-    setDarkMode, setView, setActiveCategory, setSearchQuery,
+    setDarkMode, setView, setActiveCategory, setActiveBrand, setSearchQuery,
     setToast, toggleCart, toggleWishlistDrawer,
     addToCart, removeFromCart, updateQuantity, clearCart,
     updateProducts, toggleWishlist, toggleCompare, addOrder, updateOrderStatus,
@@ -54,7 +56,7 @@ const App = () => {
     const ordersState = useSelector((state) => state.orders);
     const messages = useSelector((state) => state.messages); // Get messages state
 
-    const { isDarkMode, view, activeCategory, searchQuery, toast, isCartOpen, isWishlistOpen } = ui;
+    const { isDarkMode, view, activeCategory, activeBrand, searchQuery, toast, isCartOpen, isWishlistOpen } = ui;
     const cartItems = cart.items;
     const allProducts = products.all;
     const wishlistItems = wishlist.items;
@@ -138,13 +140,29 @@ const App = () => {
     }, [view, activeCategory, searchQuery, isLoadingView]);
 
     const filteredProducts = useMemo(() => {
-        let result = activeCategory === "All" ? allProducts : allProducts.filter((p) => p.category === activeCategory);
+        let result = allProducts;
+
+        // Filter by Category
+        if (activeCategory !== "All") {
+            result = result.filter(p => p.category === activeCategory);
+        }
+
+        // Filter by Brand
+        if (activeBrand !== "All") {
+            result = result.filter(p => p.brand === activeBrand);
+        }
+
+        // Search Filter
         if (searchQuery.trim() !== "") {
             const query = searchQuery.toLowerCase();
-            result = result.filter((p) => p.title.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
+            result = result.filter((p) =>
+                p.title.toLowerCase().includes(query) ||
+                (p.category && p.category.toLowerCase().includes(query)) ||
+                (p.brand && p.brand.toLowerCase().includes(query))
+            );
         }
         return result;
-    }, [activeCategory, searchQuery, allProducts]);
+    }, [activeCategory, activeBrand, searchQuery, allProducts]);
 
     const handleAddToCart = (product) => {
         dispatch(addToCart(product));
@@ -181,9 +199,11 @@ const App = () => {
         const commonProps = { onBack: handleGoHome, allProducts, handleAddToCart };
 
         switch (view) {
-            case 'HOME': return <HomeView searchQuery={searchQuery} activeCategory={activeCategory} onCategoryChange={handleCategoryClick} filteredProducts={filteredProducts} allProducts={allProducts} onViewDetails={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} />;
+            case 'HOME': return <HomeView searchQuery={searchQuery} activeCategory={activeCategory} activeBrand={activeBrand} onCategoryChange={(cat) => dispatch(setActiveCategory(cat))} onBrandChange={(brand) => dispatch(setActiveBrand(brand))} filteredProducts={filteredProducts} allProducts={allProducts} onViewDetails={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} onReadMoreReviews={() => { dispatch(setView('REVIEWS')); window.scrollTo(0, 0); }} />;
             case 'DETAILS': return <DetailsView selectedProduct={selectedProduct} allProducts={allProducts} onBack={handleGoHome} onAddToCart={handleAddToCart} onViewDetails={(p) => setSelectedProduct(p)} onQuickView={setQuickViewProduct} onAddToCompare={(p) => dispatch(toggleCompare(p))} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} wishlistItems={wishlistItems} compareItems={compareItems} onAddReview={(productId, review) => dispatch(addReview({ productId, review }))} />;
+            case 'REVIEWS': return <ReviewsPage onBack={handleGoHome} products={allProducts} />;
             case 'CONTACT': return <ContactView onBack={handleGoHome} onSendMessage={(msg) => dispatch(addMessage(msg))} />;
+            case 'ABOUT': return <About onBack={handleGoHome} />;
             case 'CHECKOUT': return <CheckoutView cartItems={cartItems} onBack={handleGoHome} onUpdateQuantity={(id, delta) => dispatch(updateQuantity({ id, delta }))} onRemove={(id) => dispatch(removeFromCart(id))} onConfirm={(orderData) => {
                 const newOrder = {
                     ...orderData,
@@ -221,7 +241,7 @@ const App = () => {
             />;
             case 'TRACKING': return <TrackingView onBack={handleGoHome} orders={allOrders} />;
             case 'COMPARE': return <ComparisonView compareItems={compareItems} onBack={handleGoHome} onRemove={(id) => dispatch(toggleCompare({ id }))} onAddToCart={handleAddToCart} onViewDetails={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); }} />;
-            case 'CATEGORY': return <CategoryView category={activeCategory} products={allProducts.filter(p => p.category === activeCategory)} onViewDetails={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onBack={handleGoHome} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} />;
+            case 'CATEGORY': return <CategoryView category={activeCategory} products={filteredProducts} onViewDetails={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onBack={handleGoHome} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} />;
             case 'SEARCH': return <SearchResultsView query={searchQuery} products={allProducts} onBack={handleGoHome} onViewDetails={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} />;
             case 'POLICY_SHIPPING': return <PolicyView type="shipping" onBack={handleGoHome} />;
             case 'POLICY_RETURNS': return <PolicyView type="returns" onBack={handleGoHome} />;
@@ -286,21 +306,51 @@ const App = () => {
             <WhatsAppButton />
 
             {toast && (
-                <div className="fixed bottom-10 right-10 z-[300] w-[360px] animate-fade-up">
-                    <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800 p-6 relative">
-                        <div className="flex items-center gap-5">
-                            <div className="size-10 rounded-full bg-emerald-500 flex items-center justify-center text-white">
-                                <CheckCircle2 className="size-5" />
+                <div className="fixed bottom-10 right-1/2 translate-x-1/2 md:right-10 md:translate-x-0 z-[300] w-[90%] max-w-[400px] animate-in slide-in-from-bottom-5 duration-500">
+                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] border border-white dark:border-slate-800 p-6 overflow-hidden relative group">
+                        <div className="flex items-center gap-5 relative z-10">
+                            <div className={`size-14 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-lg ${toast.type === 'success' ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-emerald-500/20' :
+                                toast.type === 'error' ? 'bg-gradient-to-br from-rose-500 to-rose-700 shadow-rose-500/20' :
+                                    'bg-gradient-to-br from-blue-500 to-indigo-700 shadow-blue-500/20'
+                                }`}>
+                                {toast.type === 'success' ? <CheckCircle2 className="size-6" /> :
+                                    toast.type === 'error' ? <X className="size-6" /> :
+                                        <Info className="size-6" />}
                             </div>
-                            <div>
-                                <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest">Notification</h4>
-                                <p className="text-[11px] font-black text-slate-600 dark:text-slate-400 italic">{toast.msg || toast.message}</p>
+                            <div className="flex-1 min-w-0">
+                                <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${toast.type === 'success' ? 'text-emerald-600' :
+                                    toast.type === 'error' ? 'text-rose-600' :
+                                        'text-blue-600'
+                                    }`}>
+                                    {toast.type === 'success' ? 'Succès' :
+                                        toast.type === 'error' ? 'Attention' :
+                                            'Information'}
+                                </h4>
+                                <p className="text-[13px] font-black text-slate-800 dark:text-white leading-tight">
+                                    {toast.msg || toast.message}
+                                </p>
                             </div>
+                            <button
+                                onClick={() => dispatch(setToast(null))}
+                                className="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all transform hover:rotate-90"
+                            >
+                                <X className="size-4" />
+                            </button>
                         </div>
-                        <button onClick={() => dispatch(setToast(null))} className="absolute top-4 right-4 text-slate-400">
-                            <X className="size-5" />
-                        </button>
-                        <div className="absolute bottom-0 left-0 h-1 bg-blue-600 animate-toast-progress"></div>
+
+                        {/* Progress Bar Container */}
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-100 dark:bg-slate-800">
+                            <div className={`h-full animate-toast-progress ${toast.type === 'success' ? 'bg-emerald-500' :
+                                toast.type === 'error' ? 'bg-rose-500' :
+                                    'bg-blue-600'
+                                }`}></div>
+                        </div>
+
+                        {/* Background subtle glow */}
+                        <div className={`absolute -right-4 -top-4 size-24 blur-3xl opacity-20 pointer-events-none ${toast.type === 'success' ? 'bg-emerald-500' :
+                            toast.type === 'error' ? 'bg-rose-500' :
+                                'bg-blue-600'
+                            }`}></div>
                     </div>
                 </div>
             )}
@@ -313,6 +363,7 @@ const App = () => {
                 onCategoryClick={handleCategoryClick}
                 onPolicyClick={(view) => dispatch(setView(`POLICY_${view.toUpperCase()}`))}
                 onAdminClick={() => dispatch(setView('ADMIN'))}
+                onReviewsClick={() => { dispatch(setView('REVIEWS')); window.scrollTo(0, 0); }}
             />
         </div>
     );

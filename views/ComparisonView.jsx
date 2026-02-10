@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ComparisonPage from '../components/ComparisonPage';
+import ComparisonPage from '../components/Product/ComparisonPage';
 
 
 const ComparisonView = ({

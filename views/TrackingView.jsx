@@ -1,6 +1,6 @@
 
 import React from 'react';
-import OrderTracking from '../components/OrderTracking';
+import OrderTracking from '../components/Checkout/OrderTracking';
 
 
 const TrackingView = ({ onBack, orders }) => {

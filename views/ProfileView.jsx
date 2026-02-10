@@ -1,6 +1,6 @@
 
 import React from 'react';
-import Profile from '../components/Profile';
+import Profile from '../components/Profile/Profile';
 
 
 const ProfileView = ({ onBack, onAdminClick, isAdmin }) => {
