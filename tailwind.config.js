@@ -6,11 +6,7 @@ import containerQueries from '@tailwindcss/container-queries';
 export default {
     content: [
         "./index.html",
-        "./*.{js,ts,jsx,tsx}",
-        "./components/**/*.{js,ts,jsx,tsx}",
-        "./views/**/*.{js,ts,jsx,tsx}",
-        "./store/**/*.{js,ts,jsx,tsx}",
-        "./store.js",
+        "./src/**/*.{js,ts,jsx,tsx}",
     ],
     darkMode: 'class',
     theme: {
