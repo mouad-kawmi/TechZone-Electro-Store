@@ -118,8 +118,8 @@ export const products = [
         description: "L'iPhone ultime. Forgé en titane. Puce A17 Pro.",
         specs: { "Écran": "6.7\" Super Retina XDR", "Processeur": "Apple A17 Pro", "RAM": "8GB", "Batterie": "4441 mAh", "Caméra": "48MP + 12MP + 12MP" },
         reviews_list: [
-            { user: "Omar B.", rating: 5, comment: "L'iPhone ultime, rien à dire. Le titane change tout niveau poids!", date: "2024-01-20", likes: 24, images: ["https://images.unsplash.com/photo-1696446701796-da61225697cc?auto=format&fit=crop&w=800&q=80"] },
-            { user: "Yassine H.", rating: 5, comment: "Service TechZone au top, livré en 24h à Marrakech.", date: "2024-01-18", likes: 12 },
+            { user: "Omar B.", rating: 5, comment: "L'iPhone ultime, rien �  dire. Le titane change tout niveau poids!", date: "2024-01-20", likes: 24, images: ["https://images.unsplash.com/photo-1696446701796-da61225697cc?auto=format&fit=crop&w=800&q=80"] },
+            { user: "Yassine H.", rating: 5, comment: "Service TechZone au top, livré en 24h �  Marrakech.", date: "2024-01-18", likes: 12 },
             { user: "Sanaa L.", rating: 4, comment: "Superbe écran, mais chauffe un peu pendant les jeux lourds.", date: "2024-01-15", likes: 5 }
         ]
     },
@@ -252,7 +252,7 @@ export const products = [
         images: localImages["Google Pixel 7a"],
         rating: 4.6,
         reviews: 89,
-        description: "Le meilleur de Google à prix réduit. Rapide et sécurisé.",
+        description: "Le meilleur de Google �  prix réduit. Rapide et sécurisé.",
         specs: { "Écran": "6.1\" OLED 90Hz", "Processeur": "Google Tensor G2", "RAM": "8GB", "Batterie": "4385 mAh", "Caméra": "64MP + 13MP" }
     },
     {
@@ -336,7 +336,7 @@ export const products = [
         images: localImages["Samsung Galaxy S23 FE"],
         rating: 4.5,
         reviews: 43,
-        description: "L'essentiel du haut de gamme à un prix accessible.",
+        description: "L'essentiel du haut de gamme �  un prix accessible.",
         specs: { "Écran": "6.4\" AMOLED 2X", "Processeur": "Exynos 2200", "RAM": "8GB", "Batterie": "4500 mAh", "Caméra": "50MP + 12MP + 8MP" }
     },
     {
@@ -378,7 +378,7 @@ export const products = [
         images: localImages["Google Pixel 8"],
         rating: 4.7,
         reviews: 58,
-        description: "Format puissant et compact. 7 ans de mises à jour.",
+        description: "Format puissant et compact. 7 ans de mises �  jour.",
         specs: { "Écran": "6.2\" Actua Display", "Processeur": "Google Tensor G3", "RAM": "8GB", "Batterie": "4575 mAh", "Caméra": "50MP + 12MP" }
     },
     {
@@ -479,7 +479,7 @@ export const products = [
         reviews: 94,
         isNew: true,
         description: "Fin. Léger. Puissant avec la puce M3.",
-        specs: { "Écran": "13.6\" Liquid Retina", "Processeur": "Apple M3 (8-core CPU)", "RAM": "8GB/16GB", "Stockage": "256GB/512GB SSD", "Batterie": "Jusqu'à 18h" }
+        specs: { "Écran": "13.6\" Liquid Retina", "Processeur": "Apple M3 (8-core CPU)", "RAM": "8GB/16GB", "Stockage": "256GB/512GB SSD", "Batterie": "Jusqu'�  18h" }
     },
     {
         id: 27,
@@ -493,7 +493,7 @@ export const products = [
         rating: 4.9,
         reviews: 32,
         description: "Performances extrêmes pour les pros. Écran Liquid Retina XDR.",
-        specs: { "Écran": "14.2\" Liquid Retina XDR", "Processeur": "Apple M3 Pro (11-core)", "RAM": "18GB", "Stockage": "512GB SSD", "Batterie": "Jusqu'à 18h" }
+        specs: { "Écran": "14.2\" Liquid Retina XDR", "Processeur": "Apple M3 Pro (11-core)", "RAM": "18GB", "Stockage": "512GB SSD", "Batterie": "Jusqu'�  18h" }
     },
     {
         id: 28,
@@ -507,7 +507,7 @@ export const products = [
         rating: 4.7,
         reviews: 45,
         description: "L'ultrabook par excellence. Design futuriste en aluminium.",
-        specs: { "Écran": "13.4\" FHD+ InfinityEdge", "Processeur": "Intel Core Ultra 5", "RAM": "16GB", "Stockage": "512GB SSD", "Batterie": "Jusqu'à 14h" }
+        specs: { "Écran": "13.4\" FHD+ InfinityEdge", "Processeur": "Intel Core Ultra 5", "RAM": "16GB", "Stockage": "512GB SSD", "Batterie": "Jusqu'�  14h" }
     },
     {
         id: 29,
@@ -521,7 +521,7 @@ export const products = [
         rating: 4.8,
         reviews: 28,
         description: "Le convertible 2-en-1 le plus élégant. Écran OLED magnifique.",
-        specs: { "Écran": "14\" 2.8K OLED Tactile", "Processeur": "Intel Core Ultra 7", "RAM": "16GB", "Stockage": "1TB SSD", "Batterie": "Jusqu'à 13h" }
+        specs: { "Écran": "14\" 2.8K OLED Tactile", "Processeur": "Intel Core Ultra 7", "RAM": "16GB", "Stockage": "1TB SSD", "Batterie": "Jusqu'�  13h" }
     },
     {
         id: 30,
@@ -535,7 +535,7 @@ export const products = [
         rating: 4.6,
         reviews: 21,
         description: "Conçu pour l'IA. Ultra-fin et performant.",
-        specs: { "Écran": "14\" OLED 120Hz", "Processeur": "Intel Core Ultra 5", "RAM": "16GB", "Stockage": "512GB SSD", "Batterie": "Jusqu'à 15h" }
+        specs: { "Écran": "14\" OLED 120Hz", "Processeur": "Intel Core Ultra 5", "RAM": "16GB", "Stockage": "512GB SSD", "Batterie": "Jusqu'�  15h" }
     },
     {
         id: 31,
@@ -646,7 +646,7 @@ export const products = [
         images: localImages["Samsung Galaxy Tab S9 Ultra"],
         rating: 4.8,
         reviews: 42,
-        description: "Écran massif Dynamic AMOLED 2X. Résistant à l'eau IP68.",
+        description: "Écran massif Dynamic AMOLED 2X. Résistant �  l'eau IP68.",
         specs: { "Écran": "14.6\" AMOLED 120Hz", "Processeur": "Snapdragon 8 Gen 2", "RAM": "12GB", "Stockage": "256GB SSD", "S Pen": "Inclus" }
     },
     {
