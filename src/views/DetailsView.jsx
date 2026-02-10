@@ -19,21 +19,19 @@ const DetailsView = ({
     if (!selectedProduct) return null;
 
     return (
-        <div className="page-content">
-            <ProductDetails
-                product={selectedProduct}
-                allProducts={allProducts}
-                onBack={onBack}
-                onAddToCart={onAddToCart}
-                onViewDetails={onViewDetails}
-                onQuickView={onQuickView}
-                onAddToCompare={onAddToCompare}
-                onToggleWishlist={onToggleWishlist}
-                wishlistItems={wishlistItems}
-                compareItems={compareItems}
-                onAddReview={onAddReview}
-            />
-        </div>
+        <ProductDetails
+            product={selectedProduct}
+            allProducts={allProducts}
+            onBack={onBack}
+            onAddToCart={onAddToCart}
+            onViewDetails={onViewDetails}
+            onQuickView={onQuickView}
+            onAddToCompare={onAddToCompare}
+            onToggleWishlist={onToggleWishlist}
+            wishlistItems={wishlistItems}
+            compareItems={compareItems}
+            onAddReview={onAddReview}
+        />
     );
 };
 

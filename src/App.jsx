@@ -36,7 +36,7 @@ import FAQView from './views/FAQView.jsx';
 // Actions
 import {
     setDarkMode, setView, setActiveCategory, setActiveBrand, setSearchQuery,
-    setToast, toggleCart, toggleWishlistDrawer,
+    setToast, toggleCart, toggleWishlistDrawer, setSelectedProductId,
     addToCart, removeFromCart, updateQuantity, clearCart,
     updateProducts, toggleWishlist, toggleCompare, addOrder, updateOrderStatus,
     deductStock, addMessage, addReview, deleteReview
@@ -56,14 +56,18 @@ const App = () => {
     const ordersState = useSelector((state) => state.orders);
     const messages = useSelector((state) => state.messages); // Get messages state
 
-    const { isDarkMode, view, activeCategory, activeBrand, searchQuery, toast, isCartOpen, isWishlistOpen } = ui;
+    const { isDarkMode, view, activeCategory, activeBrand, searchQuery, toast, isCartOpen, isWishlistOpen, selectedProductId } = ui;
     const cartItems = cart.items;
     const allProducts = products.all;
     const wishlistItems = wishlist.items;
     const compareItems = compare.items;
     const allOrders = ordersState.allOrders;
 
-    const [selectedProduct, setSelectedProduct] = useState(null);
+    const selectedProduct = useMemo(() => {
+        if (!selectedProductId) return null;
+        return allProducts.find(p => p.id === Number(selectedProductId) || p.id === selectedProductId);
+    }, [selectedProductId, allProducts]);
+
     const [quickViewProduct, setQuickViewProduct] = useState(null);
     const [lastOrder, setLastOrder] = useState(null);
     const { isLoggedIn, user: currentUser } = useSelector((state) => state.auth);
@@ -132,7 +136,15 @@ const App = () => {
             if (!isLoadingView) {
                 const pageContent = document.querySelector(".page-content");
                 if (pageContent) {
-                    gsap.fromTo(".page-content", { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: "expo.out" });
+                    gsap.fromTo(".page-content",
+                        { opacity: 0, y: 30 },
+                        {
+                            opacity: 1, y: 0, duration: 0.8, ease: "expo.out",
+                            onComplete: () => {
+                                gsap.set(".page-content", { clearProps: "transform" });
+                            }
+                        }
+                    );
                 }
             }
         }, mainRef);
@@ -171,7 +183,7 @@ const App = () => {
 
     const handleGoHome = () => {
         dispatch(setView('HOME'));
-        setSelectedProduct(null);
+        dispatch(setSelectedProductId(null));
     };
 
     const handleCategoryClick = (cat) => {
@@ -199,8 +211,8 @@ const App = () => {
         const commonProps = { onBack: handleGoHome, allProducts, handleAddToCart };
 
         switch (view) {
-            case 'HOME': return <HomeView searchQuery={searchQuery} activeCategory={activeCategory} activeBrand={activeBrand} onCategoryChange={(cat) => dispatch(setActiveCategory(cat))} onBrandChange={(brand) => dispatch(setActiveBrand(brand))} filteredProducts={filteredProducts} allProducts={allProducts} onViewDetails={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} onReadMoreReviews={() => { dispatch(setView('REVIEWS')); window.scrollTo(0, 0); }} />;
-            case 'DETAILS': return <DetailsView selectedProduct={selectedProduct} allProducts={allProducts} onBack={handleGoHome} onAddToCart={handleAddToCart} onViewDetails={(p) => setSelectedProduct(p)} onQuickView={setQuickViewProduct} onAddToCompare={(p) => dispatch(toggleCompare(p))} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} wishlistItems={wishlistItems} compareItems={compareItems} onAddReview={(productId, review) => dispatch(addReview({ productId, review }))} />;
+            case 'HOME': return <HomeView searchQuery={searchQuery} activeCategory={activeCategory} activeBrand={activeBrand} onCategoryChange={(cat) => dispatch(setActiveCategory(cat))} onBrandChange={(brand) => dispatch(setActiveBrand(brand))} filteredProducts={filteredProducts} allProducts={allProducts} onViewDetails={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} onReadMoreReviews={() => { dispatch(setView('REVIEWS')); window.scrollTo(0, 0); }} />;
+            case 'DETAILS': return <DetailsView selectedProduct={selectedProduct} allProducts={allProducts} onBack={handleGoHome} onAddToCart={handleAddToCart} onViewDetails={(p) => dispatch(setSelectedProductId(p.id))} onQuickView={setQuickViewProduct} onAddToCompare={(p) => dispatch(toggleCompare(p))} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} wishlistItems={wishlistItems} compareItems={compareItems} onAddReview={(productId, review) => dispatch(addReview({ productId, review }))} />;
             case 'REVIEWS': return <ReviewsPage onBack={handleGoHome} products={allProducts} />;
             case 'CONTACT': return <ContactView onBack={handleGoHome} onSendMessage={(msg) => dispatch(addMessage(msg))} />;
             case 'ABOUT': return <About onBack={handleGoHome} />;
@@ -240,9 +252,9 @@ const App = () => {
                 }}
             />;
             case 'TRACKING': return <TrackingView onBack={handleGoHome} orders={allOrders} />;
-            case 'COMPARE': return <ComparisonView compareItems={compareItems} onBack={handleGoHome} onRemove={(id) => dispatch(toggleCompare({ id }))} onAddToCart={handleAddToCart} onViewDetails={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); }} />;
-            case 'CATEGORY': return <CategoryView category={activeCategory} products={filteredProducts} onViewDetails={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onBack={handleGoHome} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} />;
-            case 'SEARCH': return <SearchResultsView query={searchQuery} products={allProducts} onBack={handleGoHome} onViewDetails={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} />;
+            case 'COMPARE': return <ComparisonView compareItems={compareItems} onBack={handleGoHome} onRemove={(id) => dispatch(toggleCompare({ id }))} onAddToCart={handleAddToCart} onViewDetails={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); }} />;
+            case 'CATEGORY': return <CategoryView category={activeCategory} products={filteredProducts} onViewDetails={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onBack={handleGoHome} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} />;
+            case 'SEARCH': return <SearchResultsView query={searchQuery} products={allProducts} onBack={handleGoHome} onViewDetails={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} />;
             case 'POLICY_SHIPPING': return <PolicyView type="shipping" onBack={handleGoHome} />;
             case 'POLICY_RETURNS': return <PolicyView type="returns" onBack={handleGoHome} />;
             case 'POLICY_PRIVACY': return <PolicyView type="privacy" onBack={handleGoHome} />;
@@ -271,7 +283,7 @@ const App = () => {
                 onAboutClick={() => dispatch(setView('ABOUT'))}
                 onContactClick={() => dispatch(setView('CONTACT'))}
                 onPolicyClick={(view) => dispatch(setView(`POLICY_${view.toUpperCase()}`))}
-                onViewProduct={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); }}
+                onViewProduct={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); }}
                 onQuickView={setQuickViewProduct}
                 onAddToCompare={(p) => dispatch(toggleCompare(p))}
                 onTrackOrder={() => dispatch(setView('TRACKING'))}
@@ -300,7 +312,7 @@ const App = () => {
                 product={quickViewProduct}
                 onClose={() => setQuickViewProduct(null)}
                 onAddToCart={handleAddToCart}
-                onViewDetails={(p) => { setSelectedProduct(p); dispatch(setView('DETAILS')); setQuickViewProduct(null); }}
+                onViewDetails={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); setQuickViewProduct(null); }}
             />
 
             <WhatsAppButton />

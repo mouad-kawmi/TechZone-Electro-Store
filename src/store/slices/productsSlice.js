@@ -26,7 +26,7 @@ const syncProducts = (key, fileProducts) => {
                     rating: sp.rating !== undefined ? sp.rating : fp.rating,
                     isNew: sp.isNew !== undefined ? sp.isNew : fp.isNew,
                     isOutOfStock: sp.isOutOfStock !== undefined ? sp.isOutOfStock : fp.isOutOfStock,
-                    variations: fp.variations || sp.variations
+                    variations: sp.variations !== undefined ? sp.variations : fp.variations
                 };
             }),
             ...storedCatalog

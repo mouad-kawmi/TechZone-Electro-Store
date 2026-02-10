@@ -103,19 +103,55 @@ const AdminStats = ({ stats, breakdown }) => {
                         </div>
 
                         <div className="space-y-6 lg:space-y-8">
-                            <div className="p-5 lg:p-6 bg-white/5 rounded-3xl border border-white/5 hover:border-blue-500/30 transition-all cursor-default">
-                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] mb-2">Performance Stock</p>
-                                <h4 className="text-xs lg:text-sm font-bold leading-relaxed">
-                                    {breakdown.smartphoneStock > breakdown.otherStock
-                                        ? "Les Smartphones dominent l'inventaire."
-                                        : "Votre stock est diversifie au-dela des mobiles."}
-                                </h4>
+                            {/* Low Stock Alerts Sorted */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between px-1">
+                                    <p className="text-[8px] font-black text-blue-400/60 uppercase tracking-[0.3em]">Performance Elite</p>
+                                    <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Stock Restant</span>
+                                </div>
+                                <div className="space-y-4">
+                                    {breakdown.lowStockProducts?.length > 0 ? (
+                                        breakdown.lowStockProducts.map((p) => {
+                                            const healthPercent = Math.min(100, Math.max(10, (p.stock / 50) * 100)); // Just for visual
+                                            return (
+                                                <div key={p.id} className="p-6 bg-white/5 rounded-[2rem] border border-white/5 hover:border-blue-500/20 transition-all space-y-4 group/item">
+                                                    <div className="flex items-center justify-between">
+                                                        <div className="flex items-center gap-3">
+                                                            <Activity className="size-4 text-blue-400/80" />
+                                                            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Stock Health</span>
+                                                        </div>
+                                                        <span className="text-xs font-black text-white">{p.stock} units</span>
+                                                    </div>
+
+                                                    {/* Progress Bar */}
+                                                    <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all duration-1000"
+                                                            style={{ width: `${healthPercent}%` }}
+                                                        ></div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2 text-blue-500">
+                                                        <TrendingUp className="size-3" />
+                                                        <span className="text-[8px] font-black uppercase tracking-[0.2em]">High Momentum</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })
+                                    ) : (
+                                        <div className="p-6 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
+                                            <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest leading-relaxed">
+                                                Aucune alerte critique.
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
 
                             <div className="p-5 lg:p-6 bg-white/5 rounded-3xl border border-white/5 hover:border-emerald-500/30 transition-all cursor-default">
                                 <p className="text-[8px] font-black text-emerald-500/60 uppercase tracking-[0.3em] mb-2">Statut Operationnel</p>
                                 <h4 className="text-xs lg:text-sm font-bold leading-relaxed">
-                                    {stats.find(s => s.label === "Commandes")?.value || 0} commandes a gerer.
+                                    {stats.find(s => s.label === "Commandes")?.value || 0} commandes à gérer.
                                 </h4>
                             </div>
                         </div>

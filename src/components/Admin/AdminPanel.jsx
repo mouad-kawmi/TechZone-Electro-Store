@@ -61,6 +61,11 @@ const AdminPanel = ({
 
         const otherStock = totalStock - smartphoneStock;
 
+        // Top 5 Lowest Stock Products (sorted by stock level, ASCENDING - lowest first)
+        const lowStockProducts = [...initialProducts]
+            .sort((a, b) => (a.stock || 0) - (b.stock || 0))
+            .slice(0, 5);
+
         return {
             cards: [
                 { label: "Revenu Total", value: `${totalRevenue.toLocaleString()} DH`, icon: DollarSign, color: "text-emerald-500", bg: "bg-emerald-500/10" },
@@ -68,7 +73,7 @@ const AdminPanel = ({
                 { label: "Stock Total", value: (totalStock || 0).toString(), icon: Package, color: "text-orange-500", bg: "bg-orange-500/10" },
                 { label: "Alertes Stock", value: (lowStockCount || 0).toString(), icon: Activity, color: "text-rose-500", bg: "bg-rose-500/10" }
             ],
-            breakdown: { smartphoneStock, otherStock }
+            breakdown: { smartphoneStock, otherStock, lowStockProducts }
         };
     }, [orders, initialProducts]);
 
@@ -82,7 +87,8 @@ const AdminPanel = ({
         setEditingProduct(product || {
             title: '', category: 'Smartphones', brand: '', price: 0, oldPrice: 0,
             stock: 10, image: '', isNew: true, specs: {}, technicalSpecs: {},
-            description: '', promoExpiresAt: ''
+            description: '', promoExpiresAt: '',
+            variations: { storage: [], colors: [] }
         });
         setIsEditorOpen(true);
     };
@@ -105,6 +111,42 @@ const AdminPanel = ({
         const newSpecs = { ...editingProduct.specs };
         delete newSpecs[key];
         setEditingProduct({ ...editingProduct, specs: newSpecs });
+    };
+
+    const addVariation = (type) => {
+        const currentType = editingProduct.variations?.[type] || [];
+        const newItem = type === 'storage' ? { name: 'New Storage', stock: 10 } : 'New Color';
+        setEditingProduct({
+            ...editingProduct,
+            variations: {
+                ...editingProduct.variations,
+                [type]: [...currentType, newItem]
+            }
+        });
+    };
+
+    const updateVariation = (type, index, value) => {
+        const newItems = [...(editingProduct.variations?.[type] || [])];
+        newItems[index] = value;
+        setEditingProduct({
+            ...editingProduct,
+            variations: {
+                ...editingProduct.variations,
+                [type]: newItems
+            }
+        });
+    };
+
+    const removeVariation = (type, index) => {
+        const newItems = [...(editingProduct.variations?.[type] || [])];
+        newItems.splice(index, 1);
+        setEditingProduct({
+            ...editingProduct,
+            variations: {
+                ...editingProduct.variations,
+                [type]: newItems
+            }
+        });
     };
 
     return (
@@ -371,6 +413,9 @@ const AdminPanel = ({
                 onUpdateField={updateField}
                 onAddSpec={addSpec}
                 onRemoveSpec={removeSpec}
+                onAddVariation={addVariation}
+                onUpdateVariation={updateVariation}
+                onRemoveVariation={removeVariation}
             />
         </div>
     );
