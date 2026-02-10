@@ -9,6 +9,7 @@ import ordersReducer from "./slices/ordersSlice.js";
 import messagesReducer from "./slices/messagesSlice.js";
 import bannerReducer from "./slices/bannerSlice.js";
 import settingsReducer from "./slices/settingsSlice.js";
+import notificationsReducer from "./slices/notificationsSlice.js";
 
 // Custom middleware to save cart to localStorage with debounce
 const cartMiddleware = store => next => action => {
@@ -34,7 +35,8 @@ export const store = configureStore({
         orders: ordersReducer,
         messages: messagesReducer,
         banner: bannerReducer,
-        settings: settingsReducer
+        settings: settingsReducer,
+        notifications: notificationsReducer
     },
     // middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(cartMiddleware)
 });
@@ -49,3 +51,4 @@ export * from "./slices/ordersSlice.js";
 export * from "./slices/messagesSlice.js";
 export * from "./slices/bannerSlice.js";
 export * from "./slices/settingsSlice.js";
+export * from "./slices/notificationsSlice.js";

@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import { useDispatch } from 'react-redux';
+import { addNotification } from '../../store/slices/notificationsSlice';
 import {
   Star, ShoppingCart, Truck, ShieldCheck,
   ChevronRight, ArrowLeft,
@@ -14,6 +16,7 @@ const ProductDetails = ({
   onQuickView, onAddToCompare, onToggleWishlist, wishlistItems = [], compareItems = [],
   onAddReview
 }) => {
+  const dispatch = useDispatch();
   // Use the latest version of the product from allProducts to ensure updates (like reviews) are reflected immediately
   const product = useMemo(() => {
     return allProducts?.find(p => p.id === initialProduct.id) || initialProduct;
@@ -342,6 +345,15 @@ const ProductDetails = ({
                               date: new Date().toLocaleDateString('fr-FR')
                             });
                           }
+
+                          // Simulate Admin Notification
+                          dispatch(addNotification({
+                            type: 'review',
+                            title: 'Nouvel Avis',
+                            message: `${userName} a donné ${userRating}/5 étoiles à ${product.title}`,
+                            link: '/admin/reviews'
+                          }));
+
                           setIsSubmitted(true);
                           setUserRating(0);
                           setUserComment('');

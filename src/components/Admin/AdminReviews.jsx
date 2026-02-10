@@ -159,7 +159,7 @@ const AdminReviews = ({ products = [], onDeleteReview }) => {
                                             <div className="size-2 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" />
                                             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Avis Vérifié</span>
                                         </div>
-                                        <span className="text-[8px] font-black text-slate-300 dark:text-slate-700 uppercase tracking-widest">ID: {r.id.toString().slice(0, 8)}</span>
+                                        <span className="text-[8px] font-black text-slate-300 dark:text-slate-700 uppercase tracking-widest">ID: {String(r.id || '').slice(0, 8)}</span>
                                     </div>
                                 </div>
                             </div>

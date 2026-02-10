@@ -1,6 +1,7 @@
 
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { addNotification } from '../../store/slices/notificationsSlice';
 import {
   ShieldCheck, Lock, CreditCard, Wallet,
   Truck, ArrowLeft, ChevronDown, CheckCircle2,
@@ -10,6 +11,7 @@ import {
 
 
 const Checkout = ({ items, onBack, onUpdateQuantity, onRemove, onConfirm, coupons = [] }) => {
+  const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const [selectedCardId, setSelectedCardId] = useState(user?.paymentMethods?.[0]?.id || null);
   const [isAddingNewCard, setIsAddingNewCard] = useState(false);
@@ -50,9 +52,20 @@ const Checkout = ({ items, onBack, onUpdateQuantity, onRemove, onConfirm, coupon
     else setStep(prev => prev - 1);
   };
 
+  /* import addNotification at top */
+  /* const dispatch = useDispatch(); at top of component */
+
   const handleConfirm = () => {
     setIsSubmitting(true);
     setTimeout(() => {
+      // Simulate Admin Notification
+      dispatch(addNotification({
+        type: 'order',
+        title: 'Nouvelle Commande',
+        message: `Commande de ${formData.name} d'un montant de ${total.toLocaleString()} DH`,
+        link: '/admin/orders'
+      }));
+
       onConfirm({
         ...formData,
         items, // Crucial: Include the cart items

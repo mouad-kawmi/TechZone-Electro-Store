@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { addNotification } from '../../store/slices/notificationsSlice';
 import {
   MapPin, Phone, Mail, Send,
   Linkedin, Twitter, Instagram, Youtube,
@@ -8,6 +9,7 @@ import {
 
 const Contact = ({ onBack, onSendMessage }) => {
   const settings = useSelector((state) => state.settings);
+  const dispatch = useDispatch();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,6 +21,15 @@ const Contact = ({ onBack, onSendMessage }) => {
     e.preventDefault();
     if (onSendMessage) {
       onSendMessage(formData);
+
+      // Simulate Admin Notification
+      dispatch(addNotification({
+        type: 'message',
+        title: 'Nouveau Message',
+        message: `${formData.name} a envoyé un message : ${formData.subject}`,
+        link: '/admin/messages'
+      }));
+
       alert("Chokran! Message dyalk t-sift l-admin, ghadi n-jawbok f-a9rab wa9t.");
       setFormData({ name: '', email: '', subject: 'Support Technique', message: '' });
     } else {

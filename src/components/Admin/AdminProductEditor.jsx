@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useSelector } from 'react-redux';
 import { X, Sparkles, Zap, Settings, Trash2, Save, Image as ImageIcon, Box, ListTodo, Info, ChevronDown, ChevronRight } from 'lucide-react';
 
 const AdminProductEditor = ({ isOpen, product, allProducts, onClose, onSave, onUpdateField, onAddSpec, onRemoveSpec }) => {
@@ -9,18 +10,31 @@ const AdminProductEditor = ({ isOpen, product, allProducts, onClose, onSave, onU
     const [showCatSuggestions, setShowCatSuggestions] = React.useState(false);
     const [showBrandSuggestions, setShowBrandSuggestions] = React.useState(false);
 
+    const { customCategories, customBrands } = useSelector(state => state.products);
+
     // Dynamic Lists
     const existingCats = React.useMemo(() => {
-        return [...new Set((allProducts || []).map(p => p.category).filter(Boolean))].sort();
-    }, [allProducts]);
+        const productCats = (allProducts || []).map(p => p.category).filter(Boolean);
+        return [...new Set([...productCats, ...customCategories])].sort();
+    }, [allProducts, customCategories]);
 
     const existingBrandsForCat = React.useMemo(() => {
-        if (!product?.category) return [];
-        return [...new Set((allProducts || [])
+        if (!product?.category) {
+            // Include all custom brands if no category selected
+            return [...new Set([...(allProducts || []).map(p => p.brand), ...customBrands.map(b => b.name)].filter(Boolean))].sort();
+        }
+        const productBrands = (allProducts || [])
             .filter(p => p.category === product.category)
             .map(p => p.brand)
-            .filter(Boolean))].sort();
-    }, [allProducts, product?.category]);
+            .filter(Boolean);
+
+        // Filter custom brands by the selected category
+        const filteredCustomBrands = customBrands
+            .filter(b => b.category === product.category)
+            .map(b => b.name);
+
+        return [...new Set([...productBrands, ...filteredCustomBrands])].sort();
+    }, [allProducts, product?.category, customBrands]);
 
     React.useEffect(() => {
         if (product) {
@@ -125,10 +139,17 @@ const AdminProductEditor = ({ isOpen, product, allProducts, onClose, onSave, onU
                                                             <ChevronRight className={`size-3 transition-all ${cat === product.category ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0'}`} />
                                                         </button>
                                                     ))}
-                                                    {catQuery && !existingCats.includes(catQuery) && (
-                                                        <div className="px-5 py-3 text-[10px] font-black text-blue-600 bg-blue-50/50 dark:bg-blue-500/10 italic border-t border-slate-100 dark:border-slate-800">
-                                                            + Ajouter "{catQuery}"
-                                                        </div>
+                                                    {catQuery && !existingCats.map(c => c.toLowerCase()).includes(catQuery.toLowerCase()) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                onUpdateField('category', catQuery);
+                                                                setShowCatSuggestions(false);
+                                                            }}
+                                                            className="w-full text-left px-5 py-3 text-[10px] font-black text-blue-600 bg-blue-50/50 dark:bg-blue-500/10 italic border-t border-slate-100 dark:border-slate-800 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+                                                        >
+                                                            + Ajouter "{catQuery}" comme nouvelle catégorie
+                                                        </button>
                                                     )}
                                                 </div>
                                             )}
@@ -170,10 +191,17 @@ const AdminProductEditor = ({ isOpen, product, allProducts, onClose, onSave, onU
                                                             <ChevronRight className={`size-3 transition-all ${brand === product.brand ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 group-hover/item:opacity-100 group-hover/item:translate-x-0'}`} />
                                                         </button>
                                                     ))}
-                                                    {brandQuery && !existingBrandsForCat.includes(brandQuery) && (
-                                                        <div className="px-5 py-3 text-[10px] font-black text-blue-600 bg-blue-50/50 dark:bg-blue-500/10 italic border-t border-slate-100 dark:border-slate-800">
+                                                    {brandQuery && !existingBrandsForCat.map(b => b.toLowerCase()).includes(brandQuery.toLowerCase()) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                onUpdateField('brand', brandQuery);
+                                                                setShowBrandSuggestions(false);
+                                                            }}
+                                                            className="w-full text-left px-5 py-3 text-[10px] font-black text-blue-600 bg-blue-50/50 dark:bg-blue-500/10 italic border-t border-slate-100 dark:border-slate-800 hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors"
+                                                        >
                                                             + Ajouter "{brandQuery}" {product.category ? `dans ${product.category}` : ''}
-                                                        </div>
+                                                        </button>
                                                     )}
                                                     {existingBrandsForCat.length === 0 && !brandQuery && (
                                                         <div className="px-5 py-4 text-center">

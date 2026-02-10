@@ -3,7 +3,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import {
     Plus, DollarSign, ShoppingCart, Package, Activity, Search, Filter, RefreshCcw,
     Terminal, Zap, ShieldCheck, Cpu, ChevronRight, LayoutDashboard, Menu, Mail,
-    Trash2, CheckCircle, User, Calendar, ExternalLink
+    Trash2, CheckCircle, User, Calendar, ExternalLink, Bell, X
 } from 'lucide-react';
 import AdminSidebar from './AdminSidebar.jsx';
 import AdminStats from './AdminStats.jsx';
@@ -14,9 +14,10 @@ import AdminMarketing from './AdminMarketing.jsx';
 import AdminReviews from './AdminReviews.jsx';
 import AdminProductEditor from './AdminProductEditor.jsx';
 import AdminSettings from './AdminSettings.jsx';
+import AdminCatalog from './AdminCatalog.jsx';
 import gsap from 'gsap';
 import { useDispatch, useSelector } from 'react-redux';
-import { updateSettings, markAsRead, deleteMessage } from '../../store';
+import { updateSettings, markAsRead, deleteMessage, markNotificationRead, clearNotifications } from '../../store';
 
 const AdminPanel = ({
     onBack, initialProducts, onProductsChange, messages,
@@ -24,12 +25,15 @@ const AdminPanel = ({
 }) => {
     const dispatch = useDispatch();
     const settings = useSelector(state => state.settings);
+    const { notifications } = useSelector(state => state.notifications);
     const [activeTab, setActiveTab] = useState('dashboard');
     const [isEditorOpen, setIsEditorOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
     const contentRef = useRef(null);
+    const unreadCount = notifications?.filter(n => !n.read).length || 0;
 
     // Tab Transition
     useEffect(() => {
@@ -39,27 +43,30 @@ const AdminPanel = ({
         );
     }, [activeTab]);
 
+    // ... (rest of stats calculation)
     const stats = useMemo(() => {
+        if (!orders || !initialProducts) return { cards: [], breakdown: { smartphoneStock: 0, otherStock: 0 } };
+
         const totalRevenue = orders
             .filter(o => o.status === 'Livré')
-            .reduce((acc, o) => acc + (o.finalTotal || o.amount || 0), 0);
+            .reduce((acc, o) => acc + (Number(o.finalTotal) || Number(o.amount) || 0), 0);
         const totalOrders = orders.length;
-        const totalStock = initialProducts.reduce((acc, p) => acc + (p.stock || 0), 0);
-        const lowStockCount = initialProducts.filter(p => p.stock > 0 && p.stock <= 5).length;
+        const totalStock = initialProducts.reduce((acc, p) => acc + (Number(p.stock) || 0), 0);
+        const lowStockCount = initialProducts.filter(p => (p.stock || 0) > 0 && (p.stock || 0) <= 5).length;
 
         // Categorized Stock Breakdown
         const smartphoneStock = initialProducts
             .filter(p => p.category === 'Smartphones')
-            .reduce((acc, p) => acc + (p.stock || 0), 0);
+            .reduce((acc, p) => acc + (Number(p.stock) || 0), 0);
 
         const otherStock = totalStock - smartphoneStock;
 
         return {
             cards: [
                 { label: "Revenu Total", value: `${totalRevenue.toLocaleString()} DH`, icon: DollarSign, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-                { label: "Commandes", value: totalOrders.toString(), icon: ShoppingCart, color: "text-blue-500", bg: "bg-blue-500/10" },
-                { label: "Stock Total", value: totalStock.toString(), icon: Package, color: "text-orange-500", bg: "bg-orange-500/10" },
-                { label: "Alertes Stock", value: lowStockCount.toString(), icon: Activity, color: "text-rose-500", bg: "bg-rose-500/10" }
+                { label: "Commandes", value: (totalOrders || 0).toString(), icon: ShoppingCart, color: "text-blue-500", bg: "bg-blue-500/10" },
+                { label: "Stock Total", value: (totalStock || 0).toString(), icon: Package, color: "text-orange-500", bg: "bg-orange-500/10" },
+                { label: "Alertes Stock", value: (lowStockCount || 0).toString(), icon: Activity, color: "text-rose-500", bg: "bg-rose-500/10" }
             ],
             breakdown: { smartphoneStock, otherStock }
         };
@@ -136,6 +143,75 @@ const AdminPanel = ({
                         </div>
 
                         <div className="flex items-center gap-3">
+                            {/* Notifications Bell */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                                    className="relative size-12 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center justify-center transition-all hover:scale-105 active:scale-95 shadow-sm"
+                                >
+                                    <Bell className="size-5" />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 size-5 bg-rose-500 text-white text-[10px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-slate-950">
+                                            {unreadCount > 9 ? '9+' : unreadCount}
+                                        </span>
+                                    )}
+                                </button>
+
+                                {/* Notifications Dropdown */}
+                                {isNotificationsOpen && (
+                                    <>
+                                        <div className="fixed inset-0 z-40" onClick={() => setIsNotificationsOpen(false)}></div>
+                                        <div className="absolute right-0 top-14 w-80 md:w-96 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-2xl z-50 overflow-hidden animate-in slide-in-from-top-2">
+                                            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-950/50">
+                                                <h3 className="font-bold text-slate-900 dark:text-white uppercase tracking-tight text-xs">Notifications</h3>
+                                                {notifications?.length > 0 && (
+                                                    <button onClick={() => dispatch(clearNotifications())} className="text-[10px] font-bold text-slate-400 hover:text-rose-500 uppercase tracking-widest transition-colors">
+                                                        Tout effacer
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
+                                                {!notifications || notifications.length === 0 ? (
+                                                    <div className="p-8 text-center space-y-3">
+                                                        <div className="size-12 rounded-full bg-slate-50 dark:bg-slate-800 mx-auto flex items-center justify-center text-slate-300">
+                                                            <Bell className="size-5" />
+                                                        </div>
+                                                        <p className="text-xs text-slate-400 font-medium">Aucune notification pour le moment</p>
+                                                    </div>
+                                                ) : (
+                                                    notifications.map(n => (
+                                                        <div
+                                                            key={n.id}
+                                                            onClick={() => {
+                                                                if (!n.read) dispatch(markNotificationRead(n.id));
+                                                                if (n.link) {
+                                                                    // Navigate to link logic here if needed, or just switch tab
+                                                                    if (n.link === '/admin/orders') setActiveTab('orders');
+                                                                    if (n.link === '/admin/reviews') setActiveTab('reviews');
+                                                                    if (n.link === '/admin/messages') setActiveTab('messages');
+                                                                    setIsNotificationsOpen(false);
+                                                                }
+                                                            }}
+                                                            className={`p-4 border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer flex gap-4 ${!n.read ? 'bg-blue-50/30 dark:bg-blue-900/10' : ''}`}
+                                                        >
+                                                            <div className={`mt-1 size-2 rounded-full shrink-0 ${!n.read ? 'bg-blue-500' : 'bg-slate-200 dark:bg-slate-700'}`}></div>
+                                                            <div className="space-y-1">
+                                                                <h4 className={`text-sm ${!n.read ? 'font-bold text-slate-900 dark:text-white' : 'font-medium text-slate-600 dark:text-slate-400'}`}>
+                                                                    {n.title}
+                                                                </h4>
+                                                                <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">{n.message}</p>
+                                                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-2">
+                                                                    {new Date(n.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                )}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
 
                             <button
                                 onClick={() => openEditor()}
@@ -155,6 +231,9 @@ const AdminPanel = ({
                                 onEdit={openEditor}
                                 onDelete={(id) => onProductsChange(initialProducts.filter(p => p.id !== id))}
                             />
+                        )}
+                        {activeTab === 'catalog' && (
+                            <AdminCatalog />
                         )}
 
                         {activeTab === 'orders' && <AdminOrdersTable orders={orders} onStatusChange={onOrdersChange} />}

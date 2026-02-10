@@ -3,7 +3,7 @@ import React, { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import {
     LayoutDashboard, Package, ShoppingCart, Zap, Mail, LogOut, Settings, BarChart3, ChevronRight,
-    Users, Star
+    Users, Star, ListTodo
 } from 'lucide-react';
 import gsap from 'gsap';
 import { logout } from '../../store';
@@ -16,6 +16,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, onBack, isOpen, onClose }) => {
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, description: 'Statistiques Globales' },
         { id: 'products', label: 'Produits', icon: Package, description: 'Gestion Inventaire' },
+        { id: 'catalog', label: 'Catalogue', icon: ListTodo, description: 'Catégories & Marques' },
         { id: 'orders', label: 'Commandes', icon: ShoppingCart, description: 'Ventes & Factures' },
         { id: 'customers', label: 'Clients', icon: Users, description: 'Base Clientèle' },
         { id: 'marketing', label: 'Marketing', icon: Zap, description: 'Coupons & Offres' },

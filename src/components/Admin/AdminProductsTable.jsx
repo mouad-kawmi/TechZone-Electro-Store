@@ -17,16 +17,17 @@ const AdminProductsTable = ({ products, onEdit, onDelete }) => {
 
         const query = searchQuery.toLowerCase();
         return products.filter(p =>
-            p.title?.toLowerCase().includes(query) ||
-            p.category?.toLowerCase().includes(query) ||
-            p.brand?.toLowerCase().includes(query) ||
-            p.id?.toString().includes(query)
+            (p.title || '').toLowerCase().includes(query) ||
+            (p.category || '').toLowerCase().includes(query) ||
+            (p.brand || '').toLowerCase().includes(query) ||
+            String(p.id || '').includes(query)
         );
     }, [products, searchQuery]);
 
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     const paginatedProducts = useMemo(() => {
-        const sorted = [...filteredProducts].sort((a, b) => a.stock - b.stock);
+        // Sort by ID descending (newest first)
+        const sorted = [...filteredProducts].sort((a, b) => b.id - a.id);
         return sorted.slice(currentPage * itemsPerPage, (currentPage + 1) * itemsPerPage);
     }, [filteredProducts, currentPage]);
 

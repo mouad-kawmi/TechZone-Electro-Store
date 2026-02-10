@@ -5,44 +5,84 @@ import { products as initialProducts } from "../../data/products.js";
 const syncProducts = (key, fileProducts) => {
     try {
         const storedStr = localStorage.getItem(key);
-        if (!storedStr) return fileProducts;
+        const storedCatalog = JSON.parse(localStorage.getItem("tz_catalog") || '{"categories": [], "brands": []}');
+
+        if (!storedStr) return { products: fileProducts, ...storedCatalog };
 
         const storedProducts = JSON.parse(storedStr);
 
         // Strategy: Static Data from Files + Dynamic Data from Storage
-        // This ensures that edits in products.js (specs, titles, etc.) are always visible
-        return fileProducts.map(fp => {
-            const sp = storedProducts.find(p => p.id === fp.id);
-            if (!sp) return fp;
+        return {
+            products: fileProducts.map(fp => {
+                const sp = storedProducts.find(p => p.id === fp.id);
+                if (!sp) return fp;
 
-            return {
-                ...fp, // Prioritize file data (titles, specs, categories, images)
-                // Keep dynamic data from storage if it exists
-                stock: sp.stock !== undefined ? sp.stock : fp.stock,
-                price: sp.price !== undefined ? sp.price : fp.price,
-                reviews_list: sp.reviews_list || fp.reviews_list,
-                reviews: sp.reviews !== undefined ? sp.reviews : fp.reviews,
-                rating: sp.rating !== undefined ? sp.rating : fp.rating,
-                isNew: sp.isNew !== undefined ? sp.isNew : fp.isNew,
-                isOutOfStock: sp.isOutOfStock !== undefined ? sp.isOutOfStock : fp.isOutOfStock,
-                variations: fp.variations || sp.variations // Prefer variations from files for structural changes
-            };
-        });
+                return {
+                    ...fp,
+                    stock: sp.stock !== undefined ? sp.stock : fp.stock,
+                    price: sp.price !== undefined ? sp.price : fp.price,
+                    reviews_list: sp.reviews_list || fp.reviews_list,
+                    reviews: sp.reviews !== undefined ? sp.reviews : fp.reviews,
+                    rating: sp.rating !== undefined ? sp.rating : fp.rating,
+                    isNew: sp.isNew !== undefined ? sp.isNew : fp.isNew,
+                    isOutOfStock: sp.isOutOfStock !== undefined ? sp.isOutOfStock : fp.isOutOfStock,
+                    variations: fp.variations || sp.variations
+                };
+            }),
+            ...storedCatalog
+        };
     } catch (e) {
         console.error(`Error syncing products from localStorage:`, e);
-        return fileProducts;
+        return { products: fileProducts, categories: [], brands: [] };
     }
 };
 
 const productsSlice = createSlice({
     name: "products",
     initialState: {
-        all: syncProducts("tz_products", initialProducts)
+        all: syncProducts("tz_products", initialProducts).products,
+        customCategories: syncProducts("tz_products", initialProducts).categories || [],
+        customBrands: syncProducts("tz_products", initialProducts).brands || []
     },
     reducers: {
         updateProducts: (state, action) => {
             state.all = action.payload;
             localStorage.setItem("tz_products", JSON.stringify(action.payload));
+        },
+        addCategory: (state, action) => {
+            const newCat = action.payload;
+            if (!state.customCategories.includes(newCat)) {
+                state.customCategories.push(newCat);
+                localStorage.setItem("tz_catalog", JSON.stringify({
+                    categories: state.customCategories,
+                    brands: state.customBrands
+                }));
+            }
+        },
+        addBrand: (state, action) => {
+            const { name, category } = action.payload;
+            if (!state.customBrands.some(b => b.name === name && b.category === category)) {
+                state.customBrands.push({ name, category });
+                localStorage.setItem("tz_catalog", JSON.stringify({
+                    categories: state.customCategories,
+                    brands: state.customBrands
+                }));
+            }
+        },
+        deleteBrand: (state, action) => {
+            const { name, category } = action.payload;
+            state.customBrands = state.customBrands.filter(b => !(b.name === name && b.category === category));
+            localStorage.setItem("tz_catalog", JSON.stringify({
+                categories: state.customCategories,
+                brands: state.customBrands
+            }));
+        },
+        deleteCategory: (state, action) => {
+            state.customCategories = state.customCategories.filter(c => c !== action.payload);
+            localStorage.setItem("tz_catalog", JSON.stringify({
+                categories: state.customCategories,
+                brands: state.customBrands
+            }));
         },
         addReview: (state, action) => {
             const { productId, review } = action.payload;
@@ -50,7 +90,7 @@ const productsSlice = createSlice({
             if (product) {
                 const newReview = {
                     ...review,
-                    id: Date.now(), // Generate a unique ID for the review
+                    id: Date.now(),
                     date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
                 };
                 product.reviews_list = [newReview, ...(product.reviews_list || [])];
@@ -68,9 +108,8 @@ const productsSlice = createSlice({
             }
         },
         deductStock: (state, action) => {
-            const itemsToDeduct = action.payload; // Array of { id, quantity }
+            const itemsToDeduct = action.payload;
             itemsToDeduct.forEach(item => {
-                // Check both .productId and .id to handle different item structures
                 const itemId = item.productId || item.id;
                 const product = state.all.find(p => String(p.id) === String(itemId));
 
@@ -85,5 +124,8 @@ const productsSlice = createSlice({
     }
 });
 
-export const { updateProducts, addReview, deleteReview, deductStock } = productsSlice.actions;
+export const {
+    updateProducts, addReview, deleteReview, deductStock,
+    addCategory, addBrand, deleteCategory, deleteBrand
+} = productsSlice.actions;
 export default productsSlice.reducer;
