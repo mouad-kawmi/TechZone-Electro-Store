@@ -51,8 +51,10 @@ const ordersSlice = createSlice({
     initialState,
     reducers: {
         addOrder: (state, action) => {
+            console.log('🔥 ordersSlice.addOrder appelé avec:', action.payload);
             state.allOrders.unshift(action.payload);
             localStorage.setItem("tz_orders", JSON.stringify(state.allOrders));
+            console.log('💾 Commande sauvegardée dans localStorage. Total commandes:', state.allOrders.length);
         },
         updateOrderStatus: (state, action) => {
             const { id, status } = action.payload;

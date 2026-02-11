@@ -18,7 +18,17 @@ const Profile = ({ onBack, onAdminClick, isAdmin }) => {
     const [activeTab, setActiveTab] = useState('overview');
 
     // Filter orders for the current user (if logged in)
-    const userOrders = allOrders.filter(o => o.userId === authUser?.id);
+    // Include orders with matching userId OR matching email (for guest orders)
+    const userOrders = allOrders.filter(o => {
+        if (!authUser) return false; // No user logged in
+        // Match by userId (if user was logged in during order)
+        if (o.userId && o.userId === authUser.id) return true;
+        // Match by email (for guest orders or orders before login)
+        if (o.email && authUser.email && o.email === authUser.email) return true;
+        return false;
+    });
+
+    console.log('👤 User:', authUser?.email, '| Total orders:', allOrders.length, '| User orders:', userOrders.length);
 
     // Calculate points based on orders (1 point per 10 DH) + Bonus
     const orderPoints = userOrders.reduce((acc, order) => acc + Math.floor(order.finalTotal / 10), 0);
