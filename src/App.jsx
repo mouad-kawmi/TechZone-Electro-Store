@@ -67,13 +67,18 @@ const App = () => {
 
     const handleGoHome = () => {
         dispatch(setView('HOME'));
+        dispatch(setActiveCategory('All'));
+        dispatch(setActiveBrand('All'));
+        dispatch(setSearchQuery(''));
         dispatch(setSelectedProductId(null));
+        window.scrollTo(0, 0);
     };
 
     const handleCategoryClick = (c) => {
         dispatch(setActiveCategory(c));
-        dispatch(setView('HOME'));
+        dispatch(setView('CATEGORY'));
         dispatch(setSearchQuery(''));
+        window.scrollTo(0, 0);
     };
 
     return (
@@ -83,6 +88,7 @@ const App = () => {
                 handleAddToCart={handleAddToCart}
                 searchQuery={searchQuery}
                 handleGoHome={handleGoHome}
+                handleCategoryClick={handleCategoryClick}
             />
 
             <main className="flex-grow pt-24">

@@ -77,7 +77,7 @@ const HomeView = (props) => {
 
     return (
         <div className="page-content bg-white dark:bg-slate-950">
-            {!q && (
+            {!q && (cat === "All" || !cat) && (
                 <>
                     <Hero />
                     <TrustBadges />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { X, Heart, ShoppingBag, LogOut } from 'lucide-react';
 import { useDispatch } from 'react-redux';
-import { logout, setView } from '../../../store';
+import { logout, setView, setActiveCategory, setSearchQuery } from '../../../store';
 
 const MobileMenu = ({ menuOpen, setMenuOpen, items, onCategoryClick, onWishlistClick, wishlistCount, onCartClick, cartCount, onTrackOrder, onContactClick, auth }) => {
     const dispatch = useDispatch();
@@ -24,7 +24,12 @@ const MobileMenu = ({ menuOpen, setMenuOpen, items, onCategoryClick, onWishlistC
                     {items.map((it) => (
                         <button
                             key={it.name}
-                            onClick={() => { onCategoryClick?.(it.name); setMenuOpen(false); }}
+                            onClick={() => {
+                                dispatch(setActiveCategory(it.name));
+                                dispatch(setView('CATEGORY'));
+                                dispatch(setSearchQuery(''));
+                                setMenuOpen(false);
+                            }}
                             className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all text-left"
                         >
                             <span className="text-[12px] font-bold uppercase tracking-widest">{it.label}</span>

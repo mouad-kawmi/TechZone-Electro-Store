@@ -13,8 +13,9 @@ const SearchResultsView = ({
     onAddToCart,
     onToggleWishlist,
     onAddToCompare,
-    wishlistItems,
-    compareItems
+    wishlistItems = [],
+    compareItems = [],
+    activeCategory
 }) => {
     const [priceRange, setPriceRange] = useState(25000);
     const [selectedBrand, setSelectedBrand] = useState('All');
@@ -24,9 +25,12 @@ const SearchResultsView = ({
 
     const filtered = useMemo(() => {
         let result = products.filter(p => {
-            const matchesSearch = p.title.toLowerCase().includes(query.toLowerCase()) ||
+            const matchesSearch = query ? (
+                p.title.toLowerCase().includes(query.toLowerCase()) ||
                 p.category.toLowerCase().includes(query.toLowerCase()) ||
-                p.brand.toLowerCase().includes(query.toLowerCase());
+                p.brand.toLowerCase().includes(query.toLowerCase())
+            ) : true;
+
             const matchesPrice = p.price <= priceRange;
             const matchesBrand = selectedBrand === 'All' || p.brand === selectedBrand;
             return matchesSearch && matchesPrice && matchesBrand;
@@ -39,15 +43,17 @@ const SearchResultsView = ({
         return result;
     }, [products, query, priceRange, selectedBrand, sortBy]);
 
+    const displayTitle = query ? query : (activeCategory === "All" || !activeCategory ? "Catalogue" : activeCategory);
+
     if (filtered.length === 0) {
         return (
             <div className="page-content bg-white dark:bg-slate-950 min-h-[60vh] flex flex-col items-center justify-center p-6">
                 <EmptyState
                     type="search"
-                    title="Aucun résultat !"
-                    message={`Nous n'avons trouvé aucun résultat pour "${query}". Réessayez avec un autre mot-clé.`}
+                    title="Aucun produit !"
+                    message={query ? `Aucun résultat pour "${query}"` : `Aucun produit dans la catégorie ${activeCategory}`}
                     onAction={onBack}
-                    actionLabel="Retour à l'Accueil"
+                    actionLabel="Retour"
                 />
             </div>
         );
@@ -57,18 +63,21 @@ const SearchResultsView = ({
         <div className="page-content bg-white dark:bg-slate-950 min-h-screen">
             <div className="max-w-[1440px] mx-auto px-6 py-12">
                 <Breadcrumbs
-                    paths={[{ label: 'Recherche', view: 'SEARCH' }, { label: query, view: 'SEARCH' }]}
+                    paths={[{ label: query ? 'Recherche' : 'Rayons', view: 'SEARCH' }, { label: displayTitle, view: 'SEARCH' }]}
                     onHomeClick={onBack}
                 />
 
                 <div className="flex flex-col md:flex-row items-end justify-between gap-6 mb-12">
                     <div className="space-y-4">
                         <div className="flex items-center gap-3">
-                            <div className="px-3 py-1 bg-blue-600 text-white rounded-full text-[8px] font-black uppercase tracking-widest animate-pulse">Live Search</div>
+                            <div className="px-3 py-1 bg-blue-600 text-white rounded-full text-[8px] font-black uppercase tracking-widest animate-pulse">
+                                {query ? 'Live Search' : 'Catalogue Elite'}
+                            </div>
                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Elite Engine v2.0</span>
                         </div>
                         <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter font-display leading-tight">
-                            Résultats pour <span className="text-blue-600">{query}</span>
+                            {query ? <>Résultats pour <span className="text-blue-600">{query}</span></> :
+                                <>Rayon <span className="text-blue-600">{displayTitle}</span></>}
                         </h1>
                     </div>
                 </div>

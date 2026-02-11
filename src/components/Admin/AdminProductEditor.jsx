@@ -107,7 +107,7 @@ const AdminProductEditor = ({
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Ancien Prix (DH)</label>
-                                        <input type="number" value={product.oldPrice || 0} onChange={e => onUpdateField('oldPrice', Number(e.target.value))} className="w-full h-10 bg-white dark:bg-slate-950 border rounded-lg px-4 text-xs font-black dark:text-white" />
+                                        <input type="number" value={product.oldPrice || 0} onChange={e => onUpdateField('oldPrice', Math.max(0, Number(e.target.value)))} className="w-full h-10 bg-white dark:bg-slate-950 border rounded-lg px-4 text-xs font-black dark:text-white" />
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[9px] font-black uppercase tracking-widest text-slate-400">Fin Promo</label>

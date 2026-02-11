@@ -40,7 +40,15 @@ const sampleOrders = [
 const initialState = {
     allOrders: (() => {
         const saved = safeParse("tz_orders", []);
-        return (saved && saved.length > 0) ? saved : sampleOrders;
+
+        // On commence toujours avec les commandes d'exemple
+        // Et on ajoute les commandes sauvegardées qui ne sont pas déjà dans les exemples
+        if (saved && saved.length > 0) {
+            const sampleIds = sampleOrders.map(o => o.id);
+            const newOrders = saved.filter(o => !sampleIds.includes(o.id));
+            return [...newOrders, ...sampleOrders];
+        }
+        return sampleOrders;
     })(),
     isLoading: false,
     error: null
@@ -51,10 +59,8 @@ const ordersSlice = createSlice({
     initialState,
     reducers: {
         addOrder: (state, action) => {
-            console.log('🔥 ordersSlice.addOrder appelé avec:', action.payload);
             state.allOrders.unshift(action.payload);
             localStorage.setItem("tz_orders", JSON.stringify(state.allOrders));
-            console.log('💾 Commande sauvegardée dans localStorage. Total commandes:', state.allOrders.length);
         },
         updateOrderStatus: (state, action) => {
             const { id, status } = action.payload;

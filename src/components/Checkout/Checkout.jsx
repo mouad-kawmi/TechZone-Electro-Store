@@ -59,8 +59,7 @@ const Checkout = ({ items, onBack, onConfirm }) => {
       status: 'En Cours'
     };
 
-    console.log('🎯 Nouvelle commande créée:', orderId);
-    console.log('📦 Order Data:', orderData);
+
 
     setTimeout(() => {
       dispatch(addNotification({
@@ -71,7 +70,7 @@ const Checkout = ({ items, onBack, onConfirm }) => {
       }));
 
       dispatch(addOrder(orderData));
-      console.log('✅ Commande ajoutée au store Redux');
+
 
       onConfirm(orderData);
       setIsSubmitting(false);

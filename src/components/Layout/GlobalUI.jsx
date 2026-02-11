@@ -45,6 +45,7 @@ const GlobalUI = ({ quick, setQuick, handleAddToCart, searchQuery, handleGoHome,
                 onQuickView={(p) => setQuick(p)}
                 onAddToCompare={(p) => dispatch(toggleCompare(p))}
                 onTrackOrder={() => dispatch(setView('TRACKING'))}
+                onCategoryClick={handleCategoryClick}
                 searchQuery={searchQuery}
             />
 

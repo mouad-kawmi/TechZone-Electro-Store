@@ -103,7 +103,7 @@ const EditorBasicInfo = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2 group">
                     <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-3">Prix (DH)</label>
-                    <input type="number" value={product.price} onChange={e => onUpdateField('price', Number(e.target.value))} className="w-full h-10 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 text-xs font-black text-blue-600 dark:text-blue-400 outline-none" />
+                    <input type="number" value={product.price} onChange={e => onUpdateField('price', Math.max(0, Number(e.target.value)))} className="w-full h-10 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-4 text-xs font-black text-blue-600 dark:text-blue-400 outline-none" />
                 </div>
                 <div className="space-y-2 group">
                     <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-3">

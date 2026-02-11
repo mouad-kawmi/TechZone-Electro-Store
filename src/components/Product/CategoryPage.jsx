@@ -22,28 +22,32 @@ const CategoryPage = (props) => {
 
   const SIZE = 20;
 
-  const bList = useMemo(() => Array.from(new Set(prods.map(p => p.brand))).filter(Boolean), [prods]);
+  const categoryProducts = useMemo(() => {
+    return prods.filter(p => p.category === cat);
+  }, [prods, cat]);
+
+  const bList = useMemo(() => Array.from(new Set(categoryProducts.map(p => p.brand))).filter(Boolean), [categoryProducts]);
 
   const rList = useMemo(() => {
     const list = new Set();
-    prods.forEach(p => {
+    categoryProducts.forEach(p => {
       const r = p.technicalSpecs?.ram || p.specs?.RAM || p.specs?.ram;
       if (r) list.add(r);
     });
     return Array.from(list).sort();
-  }, [prods]);
+  }, [categoryProducts]);
 
   const sList = useMemo(() => {
     const list = new Set();
-    prods.forEach(p => {
+    categoryProducts.forEach(p => {
       const s = p.technicalSpecs?.storage || p.specs?.Stockage || p.specs?.storage || p.specs?.["Stockage SSD"];
       if (s) list.add(s);
     });
     return Array.from(list).sort();
-  }, [prods]);
+  }, [categoryProducts]);
 
   const filts = useMemo(() => {
-    return prods.filter(p => {
+    return categoryProducts.filter(p => {
       const mPrice = p.price <= price;
       const mBrand = brnds.length === 0 || brnds.includes(p.brand);
       const pR = p.technicalSpecs?.ram || p.specs?.RAM || p.specs?.ram;
@@ -52,7 +56,7 @@ const CategoryPage = (props) => {
       const mStoc = vStoc.length === 0 || (pS && vStoc.includes(pS));
       return mPrice && mBrand && mRam && mStoc;
     });
-  }, [prods, price, brnds, rams, vStoc]);
+  }, [categoryProducts, price, brnds, rams, vStoc]);
 
   useEffect(() => {
     setPg(1);

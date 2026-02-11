@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Smartphone, Laptop, Tablet, Headphones, Search, Menu } from 'lucide-react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { setActiveCategory, setView, setSearchQuery } from '../../store';
 
 // Sous-composants
 import TopBar from './Parts/TopBar';
@@ -9,6 +10,7 @@ import HeaderActions from './Parts/HeaderActions';
 import MobileMenu from './Parts/MobileMenu';
 
 const Header = (props) => {
+  const dispatch = useDispatch();
   const {
     cartCount, wishlistCount, onCartClick,
     onWishlistClick, onHomeClick, onContactClick, onCategoryClick,
@@ -56,7 +58,12 @@ const Header = (props) => {
               {items.map((it) => (
                 <button
                   key={it.name}
-                  onClick={() => onCategoryClick ? onCategoryClick(it.name) : onSearch(it.name)}
+                  onClick={() => {
+                    dispatch(setActiveCategory(it.name));
+                    dispatch(setView('CATEGORY'));
+                    dispatch(setSearchQuery(''));
+                    window.scrollTo(0, 0);
+                  }}
                   className="group flex items-center gap-2 text-slate-500 dark:text-slate-400 text-[10px] font-bold hover:text-slate-950 dark:hover:text-white transition-colors uppercase tracking-widest"
                 >
                   {it.label}

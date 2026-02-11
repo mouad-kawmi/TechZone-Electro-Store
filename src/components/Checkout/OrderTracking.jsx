@@ -11,11 +11,9 @@ const OrderTracking = ({ onBack, orders = [] }) => {
 
   const handleTrack = () => {
     setError("");
-    const normalizedInput = searchId.toUpperCase().replace(/[^0-9]/g, ''); // Extract only numbers
+    const normalizedInput = searchId.trim().toUpperCase().replace(/[^0-9]/g, ''); // Extract only numbers
 
-    console.log('🔍 Recherche commande:', searchId, '→ Normalisé:', normalizedInput);
-    console.log('📦 Commandes disponibles:', orders.length);
-    console.log('📋 IDs des commandes:', orders.map(o => o.id));
+
 
     if (!normalizedInput) {
       setError("Veuillez entrer les chiffres de l'ID (ex: 482931)");
@@ -23,16 +21,19 @@ const OrderTracking = ({ onBack, orders = [] }) => {
     }
 
     const order = orders.find(o => {
-      const orderCoreId = o.id?.toString().replace(/[^0-9]/g, ''); // Extract only numbers from order ID
-      console.log('  Comparaison:', orderCoreId, '===', normalizedInput, '?', orderCoreId === normalizedInput);
-      return orderCoreId === normalizedInput;
+      const orderCoreId = o.id?.toString().replace(/[^0-9]/g, '').trim(); // Extract only numbers from order ID
+      const isMatch = orderCoreId === normalizedInput;
+
+      return isMatch;
     });
 
+
+
     if (order) {
-      console.log('✅ Commande trouvée:', order);
+
       setTrackedOrder(order);
     } else {
-      console.log('❌ Commande introuvable');
+
       setError("Commande introuvable. Vérifiez l'ID ou utilisez un ID de test (ex: 482931)");
       setTrackedOrder(null);
     }

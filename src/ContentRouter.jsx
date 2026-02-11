@@ -32,7 +32,13 @@ const ContentRouter = (props) => {
                 searchQuery={searchQuery}
                 activeCategory={activeCategory}
                 activeBrand={activeBrand}
-                onCategoryChange={(c) => dispatch(setActiveCategory(c))}
+                onCategoryChange={(c) => {
+                    dispatch(setActiveCategory(c));
+                    if (c !== 'All') {
+                        dispatch(setView('CATEGORY'));
+                    }
+                    dispatch(setSearchQuery(''));
+                }}
                 onBrandChange={(b) => dispatch(setActiveBrand(b))}
                 filteredProducts={filts}
                 allProducts={prods}
@@ -91,17 +97,20 @@ const ContentRouter = (props) => {
         case 'CHECKOUT':
             return <CheckoutView items={items} onOrderSuccess={(o) => { setLast(o); dispatch(setView('SUCCESS')); dispatch(clearCart()); }} onBack={handleGoHome} />;
         case 'SUCCESS':
-            return <OrderSuccessView order={last} onReturnHome={handleGoHome} />;
+            return <OrderSuccessView orderData={last} onReturnHome={handleGoHome} />;
         case 'SEARCH':
             return <SearchResultsView
                 query={searchQuery}
-                filteredProducts={filts}
+                products={filts}
+                activeCategory={activeCategory}
                 allProducts={prods}
                 onViewDetails={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); }}
                 onAddToCart={handleAddToCart}
                 onToggleWishlist={(p) => dispatch(toggleWishlist(p))}
                 onQuickView={(p) => setQuick(p)}
                 wishlistItems={wishes}
+                compareItems={comps}
+                onAddToCompare={(p) => dispatch(toggleCompare(p))}
                 onBack={handleGoHome}
             />;
         case 'REVIEWS': return <ReviewsPage onBack={handleGoHome} products={prods} />;
