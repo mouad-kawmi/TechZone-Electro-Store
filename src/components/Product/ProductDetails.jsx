@@ -23,6 +23,12 @@ const ProductDetails = (props) => {
 
   const [tab, setTab] = useState('specs');
 
+  useEffect(() => {
+    const handler = () => setTab('reviews');
+    window.addEventListener('open-reviews-tab', handler);
+    return () => window.removeEventListener('open-reviews-tab', handler);
+  }, []);
+
   const related = useMemo(() => {
     if (!allProducts || !product) return [];
     return allProducts
@@ -67,7 +73,7 @@ const ProductDetails = (props) => {
           </div>
 
           {/* Tabs Section */}
-          <div className="mb-12 sm:mb-24">
+          <div className="mb-12 sm:mb-24" id="product-tabs">
             <div className="flex gap-6 sm:gap-12 border-b border-slate-100 dark:border-slate-800 mb-8 sm:mb-12 overflow-x-auto pb-1 scrollbar-hide">
               {[
                 { id: 'specs', label: 'Fiche Technique', icon: ListChecks },

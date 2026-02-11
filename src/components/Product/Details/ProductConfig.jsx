@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShoppingCart, Heart, Plus, CheckCircle2, Truck, ShieldCheck } from 'lucide-react';
+import { ShoppingCart, Heart, Plus, CheckCircle2, Truck, ShieldCheck, Star } from 'lucide-react';
 
 const ProductConfig = ({ product, onAddToCart, onToggleWishlist, wishlistItems }) => {
     const s1 = product.variations?.storage?.[0];
@@ -40,6 +40,28 @@ const ProductConfig = ({ product, onAddToCart, onToggleWishlist, wishlistItems }
                         </div>
                     </div>
                     <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tighter uppercase leading-tight font-display">{product.title}</h1>
+
+                    <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                            <div className="flex gap-0.5">
+                                {[...Array(5)].map((_, i) => (
+                                    <Star key={i} className={`size-3 ${i < Math.floor(product.rating || 5) ? 'text-amber-500 fill-current' : 'text-slate-200 dark:text-slate-700'}`} />
+                                ))}
+                            </div>
+                            <span className="text-[10px] font-black text-amber-600 dark:text-amber-500">{product.rating || '5.0'}</span>
+                        </div>
+                        <button
+                            onClick={() => {
+                                const el = document.getElementById('product-tabs');
+                                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                                window.dispatchEvent(new CustomEvent('open-reviews-tab'));
+                            }}
+                            className="text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-blue-600 transition-colors border-b border-dashed border-slate-300 dark:border-slate-700 hover:border-blue-600"
+                        >
+                            Lire les {product.reviews || 0} avis clients
+                        </button>
+                    </div>
+
                     <div className="flex flex-wrap items-baseline gap-2 sm:gap-4">
                         <p className="text-4xl sm:text-5xl lg:text-6xl font-black text-blue-600 dark:text-blue-500 tracking-tighter">{product.price.toLocaleString()} <span className="text-lg sm:text-xl">DH</span></p>
                         {product.oldPrice && <p className="text-lg sm:text-2xl font-black text-slate-300 line-through">{product.oldPrice.toLocaleString()} DH</p>}

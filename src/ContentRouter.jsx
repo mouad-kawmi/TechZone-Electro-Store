@@ -41,6 +41,7 @@ const ContentRouter = (props) => {
                 onToggleWishlist={(p) => dispatch(toggleWishlist(p))}
                 onQuickView={(p) => setQuick(p)}
                 onAddToCompare={(p) => dispatch(toggleCompare(p))}
+                onReadMoreReviews={() => { dispatch(setView('REVIEWS')); window.scrollTo(0, 0); }}
                 wishlistItems={wishes}
                 compareItems={comps}
             />;
