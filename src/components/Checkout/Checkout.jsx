@@ -29,7 +29,7 @@ const Checkout = ({ items, onBack, onConfirm }) => {
     address: ''
   });
 
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotal = (items || []).reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const discountAmount = (subtotal * discount) / 100;
   const shipping = subtotal >= 2000 ? 0 : 25;
   const total = subtotal - discountAmount + shipping;
@@ -87,6 +87,7 @@ const Checkout = ({ items, onBack, onConfirm }) => {
               user={user} isAddingNewCard={isAddingNewCard} setIsAddingNewCard={setIsAddingNewCard}
               selectedCardId={selectedCardId} setSelectedCardId={setSelectedCardId}
               onPrev={() => setStep(1)} onNext={() => { window.scrollTo(0, 0); setStep(3); }}
+              total={total}
             />
           )}
 

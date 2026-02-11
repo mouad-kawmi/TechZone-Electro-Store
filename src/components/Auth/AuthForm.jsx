@@ -6,6 +6,7 @@ import {
     Fingerprint, CheckCircle2
 } from 'lucide-react';
 import { useDispatch } from 'react-redux';
+import { useGoogleLogin } from '@react-oauth/google';
 import { loginSuccess, registerSuccess, setToast } from '../../store';
 
 const AuthForm = ({ onBack }) => {
@@ -24,6 +25,34 @@ const AuthForm = ({ onBack }) => {
     const handleInputChange = (e) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
     };
+
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            setIsLoading(true);
+            try {
+                // Fetch user info from Google
+                const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+                const info = await res.json();
+
+                const googleUser = {
+                    id: 'google-' + info.sub,
+                    username: info.name,
+                    email: info.email,
+                    role: "user",
+                    avatar: info.picture
+                };
+
+                handleAuthSuccess(googleUser, true);
+            } catch (err) {
+                dispatch(setToast({ message: "Erreur lors de la connexion Google", type: "error" }));
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        onError: () => dispatch(setToast({ message: "Échec de l'authentification Google", type: "error" })),
+    });
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -227,7 +256,7 @@ const AuthForm = ({ onBack }) => {
                             className="w-full bg-slate-900 dark:bg-blue-600 text-white font-black h-20 rounded-[1.8rem] hover:bg-blue-600 dark:hover:bg-blue-500 transition-all flex items-center justify-center gap-4 shadow-2xl shadow-slate-900/10 dark:shadow-blue-600/20 active:scale-[0.98] uppercase tracking-[0.25em] text-xs group overflow-hidden relative"
                             type="submit"
                         >
-                            {isLoading ? (
+                            {isLoading && !formData.email.includes('gmail') ? (
                                 <div className="size-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
                             ) : (
                                 <>
@@ -244,16 +273,21 @@ const AuthForm = ({ onBack }) => {
                             <div className="w-full border-t border-slate-100 dark:border-slate-800"></div>
                         </div>
                         <div className="relative flex justify-center text-[10px]">
-                            <span className="bg-white dark:bg-slate-900 px-6 text-slate-400 font-bold uppercase tracking-[0.4em]">AW</span>
+                            <span className="bg-white dark:bg-slate-900 px-6 text-slate-400 font-bold uppercase tracking-[0.4em]">OU</span>
                         </div>
                     </div>
 
                     <button
-                        onClick={() => dispatch(setToast({ message: "Bientôt disponible !", type: "info" }))}
-                        className="flex items-center justify-center gap-4 w-full h-16 border border-slate-200 dark:border-slate-800 rounded-[1.5rem] bg-white dark:bg-slate-950/30 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-[0.98] group"
+                        onClick={handleGoogleLogin}
+                        disabled={isLoading}
+                        className="flex items-center justify-center gap-4 w-full h-16 border border-slate-200 dark:border-slate-800 rounded-[1.5rem] bg-white dark:bg-slate-950/30 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-[0.98] group disabled:opacity-50"
                     >
-                        <Chrome className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
-                        <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest">Compte Google account</span>
+                        {isLoading && isLogin && !formData.email ? (
+                            <div className="size-4 border-2 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
+                        ) : (
+                            <Chrome className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
+                        )}
+                        <span className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest">Connecter avec Google</span>
                     </button>
 
                     <div className="mt-10 text-center">

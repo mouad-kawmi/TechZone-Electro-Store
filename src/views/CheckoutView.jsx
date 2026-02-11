@@ -4,20 +4,20 @@ import Checkout from '../components/Checkout/Checkout';
 
 
 const CheckoutView = ({
-    cartItems,
+    items,
     onBack,
     onUpdateQuantity,
     onRemove,
-    onConfirm
+    onOrderSuccess
 }) => {
     return (
         <div className="page-content">
             <Checkout
-                items={cartItems}
+                items={items}
                 onBack={onBack}
                 onUpdateQuantity={onUpdateQuantity}
                 onRemove={onRemove}
-                onConfirm={onConfirm}
+                onConfirm={onOrderSuccess}
             />
         </div>
     );
