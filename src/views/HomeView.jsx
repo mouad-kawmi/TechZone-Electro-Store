@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Hero from '../components/Home/Hero';
 import ProductCard from '../components/Product/ProductCard';
 import Testimonials from '../components/Home/Testimonials';
@@ -9,13 +8,12 @@ import CategoryGrid from '../components/Product/CategoryGrid';
 import FlashSales from '../components/Home/FlashSales';
 import PromoBanner from '../components/Home/PromoBanner';
 
-import { CATEGORIES } from '../data/products';
 import {
     LayoutGrid, Smartphone, Laptop, Tablet,
     Headphones
 } from 'lucide-react';
 
-const CATEGORY_ICONS = {
+const ICONS = {
     "All": LayoutGrid,
     "Smartphones": Smartphone,
     "Laptops": Laptop,
@@ -23,189 +21,167 @@ const CATEGORY_ICONS = {
     "Audio": Headphones
 };
 
-const ITEMS_PER_PAGE = 20;
+const PAGE_SIZE = 20;
 
-const HomeView = ({
-    searchQuery,
-    activeCategory,
-    activeBrand,
-    onCategoryChange,
-    onBrandChange,
-    filteredProducts,
-    allProducts,
-    onViewDetails,
-    onQuickView,
-    onAddToCart,
-    onToggleWishlist,
-    onAddToCompare,
-    wishlistItems,
-    compareItems,
-    onReadMoreReviews
-}) => {
-    const [currentPage, setCurrentPage] = React.useState(1);
-    const gridRef = React.useRef(null);
+const HomeView = (props) => {
+    const {
+        searchQuery: q,
+        activeCategory: cat,
+        activeBrand: brand,
+        onCategoryChange,
+        onBrandChange,
+        filteredProducts: filtered,
+        allProducts: all,
+        onViewDetails,
+        onQuickView,
+        onAddToCart,
+        onToggleWishlist,
+        onAddToCompare,
+        wishlistItems: wish,
+        compareItems: comp,
+        onReadMoreReviews
+    } = props;
 
-    // Reset pagination
-    React.useEffect(() => {
-        setCurrentPage(1);
-    }, [activeCategory, activeBrand, searchQuery]);
+    const [curr, setCurr] = useState(1);
+    const grid = useRef(null);
 
-    // Dynamic Lists from actual products
-    const dynamicLists = React.useMemo(() => {
-        const products = allProducts || [];
-        const cats = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
-        const brands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort();
+    useEffect(() => {
+        setCurr(1);
+    }, [cat, brand, q]);
 
-        return {
-            categories: ["All", ...cats],
-            brands: ["All", ...brands]
-        };
-    }, [allProducts]);
+    const listes = useMemo(() => {
+        const p = all || [];
+        const c = ["All", ...new Set(p.map(x => x.category).filter(Boolean))].sort();
+        const b = ["All", ...new Set(p.map(x => x.brand).filter(Boolean))].sort();
+        return { c, b };
+    }, [all]);
 
-    const stats = React.useMemo(() => {
-        const counts = { categories: {}, brands: {} };
-        const products = allProducts || [];
-
-        dynamicLists.categories.forEach(cat => {
-            counts.categories[cat] = cat === "All" ? products.length : products.filter(p => p.category === cat).length;
+    const counts = useMemo(() => {
+        const c1 = {};
+        const p = all || [];
+        listes.c.forEach(x => {
+            c1[x] = x === "All" ? p.length : p.filter(y => y.category === x).length;
         });
+        return c1;
+    }, [all, listes]);
 
-        dynamicLists.brands.forEach(brand => {
-            counts.brands[brand] = brand === "All" ? products.length : products.filter(p => p.brand === brand).length;
-        });
+    const pages = Math.ceil(filtered.length / PAGE_SIZE);
+    const displayed = filtered.slice((curr - 1) * PAGE_SIZE, curr * PAGE_SIZE);
 
-        return counts;
-    }, [allProducts, dynamicLists]);
-
-    const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
-    const paginatedProducts = filteredProducts.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    );
-
-    const handlePageChange = (page) => {
-        setCurrentPage(page);
-        if (gridRef.current) {
-            const yOffset = -100;
-            const element = gridRef.current;
-            const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-            window.scrollTo({ top: y, behavior: 'smooth' });
+    const goPage = (p) => {
+        setCurr(p);
+        if (grid.current) {
+            window.scrollTo({ top: grid.current.offsetTop - 100, behavior: 'smooth' });
         }
     };
 
     return (
         <div className="page-content bg-white dark:bg-slate-950">
-            {!searchQuery && (
+            {!q && (
                 <>
                     <Hero />
                     <TrustBadges />
                     <BrandLogos />
-                    <PromoBanner products={allProducts} onViewDetails={onViewDetails} />
-                    <CategoryGrid onCategoryChange={(cat) => { onCategoryChange(cat); onBrandChange("All"); setCurrentPage(1); }} allProducts={allProducts} />
+                    <PromoBanner products={all} onViewDetails={onViewDetails} />
+                    <CategoryGrid onCategoryChange={(c) => { onCategoryChange(c); onBrandChange("All"); setCurr(1); }} allProducts={all} />
                 </>
             )}
 
-            <section className="max-w-[1440px] mx-auto px-6 py-16" id="products" ref={gridRef}>
+            <section className="max-w-[1440px] mx-auto px-6 py-16" id="products" ref={grid}>
                 <div className="flex flex-col gap-10 mb-12">
                     <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white uppercase italic tracking-tighter font-display leading-tight">
-                        {searchQuery ? `Résultats : ${searchQuery}` : <>TechZone <span className="text-blue-600">Elite Store</span></>}
+                        {q ? `Résultats : ${q}` : <>TechZone <span className="text-blue-600">Elite Store</span></>}
                     </h2>
 
-                    <div className="space-y-8">
-                        {/* Categories Row */}
-                        <div className="space-y-4">
-                            <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-1">Filtrer par Univers</h4>
-                            <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar -mx-6 px-6 scroll-smooth">
-                                {dynamicLists.categories.map(cat => {
-                                    const Icon = CATEGORY_ICONS[cat] || LayoutGrid;
-                                    const isActive = activeCategory === cat;
-                                    return (
-                                        <button
-                                            key={cat}
-                                            onClick={() => { onCategoryChange(cat); setCurrentPage(1); }}
-                                            className={`
-                                                shrink-0 flex items-center gap-3 px-6 py-4 rounded-2xl transition-all duration-500 group/btn
-                                                ${isActive
-                                                    ? 'bg-blue-600 text-white shadow-2xl shadow-blue-600/30 scale-105'
-                                                    : 'bg-slate-50 dark:bg-slate-900 text-slate-400 border border-slate-100 dark:border-slate-800 hover:border-blue-600/30'}
-                                            `}
-                                        >
-                                            <Icon className={`size-4 transition-transform duration-500 group-hover/btn:rotate-12 ${isActive ? 'text-white' : 'text-blue-600'}`} />
-                                            <div className="flex flex-col items-start leading-none">
-                                                <span className="text-[9px] font-black uppercase tracking-widest">{cat}</span>
-                                                <span className={`text-[8px] font-bold uppercase mt-1 ${isActive ? 'text-blue-200' : 'text-slate-400'}`}>
-                                                    {stats.categories[cat]} Produits
-                                                </span>
-                                            </div>
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                    <div className="space-y-4">
+                        <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 ml-1">Rayons</h4>
+                        <div className="flex items-center gap-3 overflow-x-auto pb-4 no-scrollbar -mx-6 px-6 scroll-smooth">
+                            {listes.c.map(x => {
+                                const Icon = ICONS[x] || LayoutGrid;
+                                const active = cat === x;
+                                return (
+                                    <button
+                                        key={x}
+                                        onClick={() => { onCategoryChange(x); setCurr(1); }}
+                                        className={`shrink-0 flex items-center gap-3 px-6 py-4 rounded-2xl transition-all duration-500 group/btn
+                                            ${active ? 'bg-blue-600 text-white shadow-2xl shadow-blue-600/30 scale-105'
+                                                : 'bg-slate-50 dark:bg-slate-900 text-slate-400 border border-slate-100 dark:border-slate-800 hover:border-blue-600/30'}
+                                        `}
+                                    >
+                                        <Icon className={`size-4 transition-transform duration-500 group-hover/btn:rotate-12 ${active ? 'text-white' : 'text-blue-600'}`} />
+                                        <div className="flex flex-col items-start leading-none">
+                                            <span className="text-[9px] font-black uppercase tracking-widest">{x}</span>
+                                            <span className={`text-[8px] font-bold uppercase mt-1 ${active ? 'text-blue-200' : 'text-slate-400'}`}>
+                                                {counts[x]} Produits
+                                            </span>
+                                        </div>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
 
                 <div className="product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
-                    {paginatedProducts.map((product) => (
-                        <div key={product.id} className="product-card-anim">
+                    {displayed.map((p) => (
+                        <div key={p.id} className="product-card-anim">
                             <ProductCard
-                                product={product}
+                                product={p}
                                 onViewDetails={onViewDetails}
                                 onQuickView={onQuickView}
                                 onAddToCart={onAddToCart}
                                 onToggleWishlist={onToggleWishlist}
                                 onAddToCompare={onAddToCompare}
-                                isFavorite={wishlistItems.some((wi) => wi.id === product.id)}
-                                isComparing={compareItems.some((ci) => ci.id === product.id)}
+                                isFavorite={wish.some((w) => w.id === p.id)}
+                                isComparing={comp.some((c) => c.id === p.id)}
                             />
                         </div>
                     ))}
                 </div>
 
-                {/* Technical Pagination Console */}
-                {totalPages > 1 && (
+                {pages > 1 && (
                     <div className="flex items-center justify-center gap-2 pt-8 border-t border-slate-100 dark:border-slate-800">
                         <button
-                            onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                            disabled={currentPage === 1}
+                            onClick={() => goPage(Math.max(1, curr - 1))}
+                            disabled={curr === 1}
                             className="px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-[9px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         >
-                            Précédent
+                            Back
                         </button>
 
                         <div className="flex items-center gap-2">
-                            {[...Array(totalPages)].map((_, i) => (
+                            {[...Array(pages)].map((_, i) => (
                                 <button
                                     key={i + 1}
-                                    onClick={() => handlePageChange(i + 1)}
-                                    className={`size-10 rounded-xl flex items-center justify-center text-[10px] font-black transition-all ${currentPage === i + 1
+                                    onClick={() => goPage(i + 1)}
+                                    className={`size-10 rounded-xl flex items-center justify-center text-[10px] font-black transition-all ${curr === i + 1
                                         ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                                         : 'bg-slate-50 dark:bg-slate-900 text-slate-400 hover:text-slate-900 dark:hover:text-white border border-slate-100 dark:border-slate-800'
                                         }`}
                                 >
-                                    {String(i + 1).padStart(2, '0')}
+                                    {i + 1}
                                 </button>
                             ))}
                         </div>
 
                         <button
-                            onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                            disabled={currentPage === totalPages}
+                            onClick={() => goPage(Math.min(pages, curr + 1))}
+                            disabled={curr === pages}
                             className="px-6 py-3 rounded-xl border border-slate-200 dark:border-slate-800 text-[9px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-900 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                         >
-                            Suivant
+                            Next
                         </button>
                     </div>
                 )}
             </section>
 
-            {!searchQuery && (
+            {!q && (
                 <>
-                    <FlashSales products={allProducts} onAddToCart={onAddToCart} />
-                    <Testimonials onReadMoreReviews={onReadMoreReviews} allProducts={allProducts} />
+                    <FlashSales products={all} onAddToCart={onAddToCart} />
+                    <Testimonials onReadMoreReviews={onReadMoreReviews} allProducts={all} />
                 </>
             )}
-            {searchQuery && <Testimonials onReadMoreReviews={onReadMoreReviews} allProducts={allProducts} />}
+            {q && <Testimonials onReadMoreReviews={onReadMoreReviews} allProducts={all} />}
         </div>
     );
 };

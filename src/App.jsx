@@ -1,184 +1,68 @@
-
-import React, { useMemo, useEffect, useState, useLayoutEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-// Components
-import Header from './components/Layout/Header';
-import CartDrawer from './components/Checkout/CartDrawer';
-import WishlistDrawer from './components/Product/WishlistDrawer';
-import QuickViewModal from './components/Product/QuickViewModal';
-import WhatsAppButton from './components/Layout/WhatsAppButton';
 import Footer from './components/Layout/Footer';
-import { SkeletonCard, SkeletonDetails } from './components/UI/Skeleton';
-import About from './components/Pages/About';
-import { CheckCircle2, X, Info } from 'lucide-react';
+import GlobalUI from './components/Layout/GlobalUI';
+import ContentRouter from './ContentRouter';
+import useAppEffects from './hooks/useAppEffects';
 
-
-// Views
-import HomeView from './views/HomeView.jsx';
-import DetailsView from './views/DetailsView.jsx';
-import CheckoutView from './views/CheckoutView.jsx';
-import ComparisonView from './views/ComparisonView.jsx';
-import ContactView from './views/ContactView.jsx';
-import OrderSuccessView from './views/OrderSuccessView.jsx';
-import LoginView from './views/LoginView.jsx';
-import ProfileView from './views/ProfileView.jsx';
-import AdminView from './views/AdminView.jsx';
-import CategoryView from './components/Product/CategoryPage.jsx';
-import ReviewsPage from './components/Pages/ReviewsPage.jsx';
-import TrackingView from './views/TrackingView.jsx';
-import SearchResultsView from './views/SearchResultsView.jsx';
-import PolicyView from './views/PolicyView.jsx';
-import FAQView from './views/FAQView.jsx';
-
-// Actions
+// Redux
 import {
-    setDarkMode, setView, setActiveCategory, setActiveBrand, setSearchQuery,
-    setToast, toggleCart, toggleWishlistDrawer, setSelectedProductId,
-    addToCart, removeFromCart, updateQuantity, clearCart,
-    updateProducts, toggleWishlist, toggleCompare, addOrder, updateOrderStatus,
-    deductStock, addMessage, addReview, deleteReview
+    setToast, setActiveCategory, setActiveBrand, updateProducts, updateOrderStatus,
+    setView, setSelectedProductId, addToCart, clearCart, toggleWishlist, toggleCompare,
+    setSearchQuery, deleteReview
 } from "./store";
-
-gsap.registerPlugin(ScrollTrigger);
 
 const App = () => {
     const dispatch = useDispatch();
-    const mainRef = useRef(null);
+    const main = useRef(null);
 
     const ui = useSelector((state) => state.ui);
     const cart = useSelector((state) => state.cart);
     const products = useSelector((state) => state.products);
     const wishlist = useSelector((state) => state.wishlist);
     const compare = useSelector((state) => state.compare);
-    const ordersState = useSelector((state) => state.orders);
-    const messages = useSelector((state) => state.messages); // Get messages state
+    const orders = useSelector((state) => state.orders);
+    const auth = useSelector((state) => state.auth);
 
-    const { isDarkMode, view, activeCategory, activeBrand, searchQuery, toast, isCartOpen, isWishlistOpen, selectedProductId } = ui;
-    const cartItems = cart.items;
-    const allProducts = products.all;
-    const wishlistItems = wishlist.items;
-    const compareItems = compare.items;
-    const allOrders = ordersState.allOrders;
+    const { view, activeCategory, activeBrand, searchQuery, toast, selectedProductId } = ui;
+    const { items } = cart;
+    const { all: prods } = products;
+    const { items: wishes } = wishlist;
+    const { items: comps } = compare;
+    const { allOrders: allO } = orders;
 
-    const selectedProduct = useMemo(() => {
-        if (!selectedProductId) return null;
-        return allProducts.find(p => p.id === Number(selectedProductId) || p.id === selectedProductId);
-    }, [selectedProductId, allProducts]);
+    const [quick, setQuick] = useState(null);
+    const [last, setLast] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    const [quickViewProduct, setQuickViewProduct] = useState(null);
-    const [lastOrder, setLastOrder] = useState(null);
-    const { isLoggedIn, user: currentUser } = useSelector((state) => state.auth);
-    const [isLoadingView, setIsLoadingView] = useState(false);
+    // Initialisation
+    useAppEffects(dispatch, { ...ui, loading, main });
 
     useEffect(() => {
-        const win = window;
-        if (win.Lenis) {
-            const lenis = new win.Lenis({
-                duration: 1.2,
-                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                smoothWheel: true,
-            });
-
-            function raf(time) {
-                lenis.raf(time);
-                requestAnimationFrame(raf);
-            }
-            requestAnimationFrame(raf);
-
-            lenis.on('scroll', ScrollTrigger.update);
-            gsap.ticker.add((time) => { lenis.raf(time * 1000); });
-            gsap.ticker.lagSmoothing(0);
-            return () => { lenis.destroy(); };
-        }
-    }, []);
-
-    useEffect(() => {
-        if (isDarkMode) document.documentElement.classList.add('dark');
-        else document.documentElement.classList.remove('dark');
-    }, [isDarkMode]);
-
-    useEffect(() => {
-        const magnets = document.querySelectorAll('.magnetic');
-        magnets.forEach((el) => {
-            el.addEventListener('mousemove', (e) => {
-                const { clientX, clientY } = e;
-                const { left, top, width, height } = el.getBoundingClientRect();
-                const x = clientX - (left + width / 2);
-                const y = clientY - (top + height / 2);
-                gsap.to(el, { x: x * 0.3, y: y * 0.3, duration: 0.3, ease: "power2.out" });
-            });
-            el.addEventListener('mouseleave', () => {
-                gsap.to(el, { x: 0, y: 0, duration: 0.7, ease: "elastic.out(1, 0.3)" });
-            });
-        });
-    }, [view, isLoadingView, searchQuery]);
-
-    useEffect(() => {
-        setIsLoadingView(true);
-        const timer = setTimeout(() => setIsLoadingView(false), 600);
+        setLoading(true);
+        const timer = setTimeout(() => setLoading(false), 600);
         return () => clearTimeout(timer);
     }, [view, activeCategory]);
 
-    useEffect(() => {
-        if (toast) {
-            const timer = setTimeout(() => {
-                dispatch(setToast(null));
-            }, 2000);
-            return () => clearTimeout(timer);
-        }
-    }, [toast, dispatch]);
+    const selP = useMemo(() => {
+        if (!selectedProductId) return null;
+        return prods.find(p => p.id === Number(selectedProductId) || p.id === selectedProductId);
+    }, [selectedProductId, prods]);
 
-    useLayoutEffect(() => {
-        const ctx = gsap.context(() => {
-            if (!isLoadingView) {
-                const pageContent = document.querySelector(".page-content");
-                if (pageContent) {
-                    gsap.fromTo(".page-content",
-                        { opacity: 0, y: 30 },
-                        {
-                            opacity: 1, y: 0, duration: 0.8, ease: "expo.out",
-                            onComplete: () => {
-                                gsap.set(".page-content", { clearProps: "transform" });
-                            }
-                        }
-                    );
-                }
-            }
-        }, mainRef);
-        return () => ctx.revert();
-    }, [view, activeCategory, searchQuery, isLoadingView]);
-
-    const filteredProducts = useMemo(() => {
-        let result = allProducts;
-
-        // Filter by Category
-        if (activeCategory !== "All") {
-            result = result.filter(p => p.category === activeCategory);
-        }
-
-        // Filter by Brand
-        if (activeBrand !== "All") {
-            result = result.filter(p => p.brand === activeBrand);
-        }
-
-        // Search Filter
+    const filts = useMemo(() => {
+        let res = prods;
+        if (activeCategory !== "All") res = res.filter(p => p.category === activeCategory);
+        if (activeBrand !== "All") res = res.filter(p => p.brand === activeBrand);
         if (searchQuery.trim() !== "") {
-            const query = searchQuery.toLowerCase();
-            result = result.filter((p) =>
-                p.title.toLowerCase().includes(query) ||
-                (p.category && p.category.toLowerCase().includes(query)) ||
-                (p.brand && p.brand.toLowerCase().includes(query))
-            );
+            const q = searchQuery.toLowerCase();
+            res = res.filter(p => p.title.toLowerCase().includes(q) || (p.category && p.category.toLowerCase().includes(q)) || (p.brand && p.brand.toLowerCase().includes(q)));
         }
-        return result;
-    }, [activeCategory, activeBrand, searchQuery, allProducts]);
+        return res;
+    }, [activeCategory, activeBrand, searchQuery, prods]);
 
-    const handleAddToCart = (product) => {
-        dispatch(addToCart(product));
-        dispatch(setToast({ msg: `${product.title} ajouté au panier !`, type: 'success' }));
+    const handleAddToCart = (p) => {
+        dispatch(addToCart(p));
+        dispatch(setToast({ msg: `${p.title} ajouté !`, type: 'success' }));
     };
 
     const handleGoHome = () => {
@@ -186,188 +70,35 @@ const App = () => {
         dispatch(setSelectedProductId(null));
     };
 
-    const handleCategoryClick = (cat) => {
-        dispatch(setActiveCategory(cat));
-        if (cat === "All") {
-            dispatch(setView('HOME'));
-        } else {
-            dispatch(setView('CATEGORY'));
-        }
-        window.scrollTo(0, 0);
-    };
-
-    const renderContent = () => {
-        if (isLoadingView) {
-            if (view === 'DETAILS') return <SkeletonDetails />;
-            return (
-                <section className="max-w-[1440px] mx-auto px-6 py-24">
-                    <div className="product-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <SkeletonCard key={i} />)}
-                    </div>
-                </section>
-            );
-        }
-
-        const commonProps = { onBack: handleGoHome, allProducts, handleAddToCart };
-
-        switch (view) {
-            case 'HOME': return <HomeView searchQuery={searchQuery} activeCategory={activeCategory} activeBrand={activeBrand} onCategoryChange={(cat) => dispatch(setActiveCategory(cat))} onBrandChange={(brand) => dispatch(setActiveBrand(brand))} filteredProducts={filteredProducts} allProducts={allProducts} onViewDetails={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} onReadMoreReviews={() => { dispatch(setView('REVIEWS')); window.scrollTo(0, 0); }} />;
-            case 'DETAILS': return <DetailsView selectedProduct={selectedProduct} allProducts={allProducts} onBack={handleGoHome} onAddToCart={handleAddToCart} onViewDetails={(p) => dispatch(setSelectedProductId(p.id))} onQuickView={setQuickViewProduct} onAddToCompare={(p) => dispatch(toggleCompare(p))} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} wishlistItems={wishlistItems} compareItems={compareItems} onAddReview={(productId, review) => dispatch(addReview({ productId, review }))} />;
-            case 'REVIEWS': return <ReviewsPage onBack={handleGoHome} products={allProducts} />;
-            case 'CONTACT': return <ContactView onBack={handleGoHome} onSendMessage={(msg) => dispatch(addMessage(msg))} />;
-            case 'ABOUT': return <About onBack={handleGoHome} />;
-            case 'CHECKOUT': return <CheckoutView cartItems={cartItems} onBack={handleGoHome} onUpdateQuantity={(id, delta) => dispatch(updateQuantity({ id, delta }))} onRemove={(id) => dispatch(removeFromCart(id))} onConfirm={(orderData) => {
-                const newOrder = {
-                    ...orderData,
-                    id: `TZ-${Math.floor(Math.random() * 1000000)}`,
-                    date: new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }),
-                    status: 'En Attente',
-                    userId: currentUser?.id
-                };
-                dispatch(addOrder(newOrder));
-                dispatch(clearCart());
-                setLastOrder(newOrder);
-                dispatch(setView('ORDER_SUCCESS'));
-            }} />;
-            case 'ORDER_SUCCESS': return <OrderSuccessView onContinue={handleGoHome} orderData={lastOrder} onTrack={() => dispatch(setView('TRACKING'))} />;
-            case 'LOGIN': return <LoginView onBack={() => {
-                const isAdmin = currentUser?.role === 'admin' || currentUser?.email === 'admin';
-                dispatch(setView(isAdmin ? 'ADMIN' : 'HOME'));
-            }} onGoRegister={() => dispatch(setView('HOME'))} onLogin={() => { }} />;
-            case 'PROFILE': return <ProfileView onBack={() => dispatch(setView('HOME'))} onAdminClick={(currentUser?.role === 'admin' || currentUser?.email === 'admin') ? () => dispatch(setView('ADMIN')) : null} isAdmin={(currentUser?.role === 'admin' || currentUser?.email === 'admin')} />;
-            case 'ADMIN': return <AdminView
-                onBack={handleGoHome}
-                allProducts={allProducts}
-                onProductsChange={(prods) => dispatch(updateProducts(prods))}
-                orders={allOrders}
-                messages={messages?.items || []}
-                onDeleteReview={(productId, reviewId) => dispatch(deleteReview({ productId, reviewId }))}
-                onOrdersChange={(order, status) => {
-                    dispatch(updateOrderStatus({ id: order.id, status }));
-                    if (status === 'Livré') {
-                        if (order.items && order.items.length > 0) {
-                            dispatch(deductStock(order.items));
-                        }
-                    }
-                }}
-            />;
-            case 'TRACKING': return <TrackingView onBack={handleGoHome} orders={allOrders} />;
-            case 'COMPARE': return <ComparisonView compareItems={compareItems} onBack={handleGoHome} onRemove={(id) => dispatch(toggleCompare({ id }))} onAddToCart={handleAddToCart} onViewDetails={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); }} />;
-            case 'CATEGORY': return <CategoryView category={activeCategory} products={filteredProducts} onViewDetails={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onBack={handleGoHome} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} />;
-            case 'SEARCH': return <SearchResultsView query={searchQuery} products={allProducts} onBack={handleGoHome} onViewDetails={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); }} onQuickView={setQuickViewProduct} onAddToCart={handleAddToCart} onToggleWishlist={(p) => dispatch(toggleWishlist(p))} onAddToCompare={(p) => dispatch(toggleCompare(p))} wishlistItems={wishlistItems} compareItems={compareItems} />;
-            case 'POLICY_SHIPPING': return <PolicyView type="shipping" onBack={handleGoHome} />;
-            case 'POLICY_RETURNS': return <PolicyView type="returns" onBack={handleGoHome} />;
-            case 'POLICY_PRIVACY': return <PolicyView type="privacy" onBack={handleGoHome} />;
-            case 'POLICY_TERMS': return <PolicyView type="terms" onBack={handleGoHome} />;
-            case 'POLICY_FAQ': return <FAQView onBack={handleGoHome} />;
-            default: return <div className="py-20 text-center uppercase font-black text-slate-400">Page non disponible</div>;
-        }
+    const handleCategoryClick = (c) => {
+        dispatch(setActiveCategory(c));
+        dispatch(setView('HOME'));
+        dispatch(setSearchQuery(''));
     };
 
     return (
-        <div ref={mainRef} className="min-h-screen flex flex-col bg-[#f8fafc] dark:bg-slate-950 transition-colors duration-500 overflow-x-hidden">
-            <Header
-                cartCount={cartItems.length}
-                wishlistCount={wishlistItems.length}
-                allProducts={allProducts}
-                onSearch={(q) => dispatch(setSearchQuery(q))}
-                onSearchSubmit={(q) => {
-                    dispatch(setSearchQuery(q));
-                    dispatch(setView('SEARCH'));
-                    window.scrollTo(0, 0);
-                }}
-                onHomeClick={handleGoHome}
-                onCategoryClick={handleCategoryClick}
-                onCartClick={() => dispatch(toggleCart())}
-                onWishlistClick={() => dispatch(toggleWishlistDrawer())}
-                onAboutClick={() => dispatch(setView('ABOUT'))}
-                onContactClick={() => dispatch(setView('CONTACT'))}
-                onPolicyClick={(view) => dispatch(setView(`POLICY_${view.toUpperCase()}`))}
-                onViewProduct={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); }}
-                onQuickView={setQuickViewProduct}
-                onAddToCompare={(p) => dispatch(toggleCompare(p))}
-                onTrackOrder={() => dispatch(setView('TRACKING'))}
+        <div ref={main} className="min-h-screen flex flex-col bg-[#f8fafc] dark:bg-slate-950 transition-colors duration-500 overflow-x-hidden">
+            <GlobalUI
+                quick={quick} setQuick={setQuick}
+                handleAddToCart={handleAddToCart}
                 searchQuery={searchQuery}
+                handleGoHome={handleGoHome}
             />
 
-            <CartDrawer
-                isOpen={isCartOpen}
-                items={cartItems}
-                onClose={() => dispatch(toggleCart())}
-                onCheckout={() => { dispatch(setView('CHECKOUT')); dispatch(toggleCart()); }}
-                onRemove={(id) => dispatch(removeFromCart(id))}
-                onUpdateQuantity={(id, delta) => dispatch(updateQuantity({ id, delta }))}
-            />
-
-            <WishlistDrawer
-                isOpen={isWishlistOpen}
-                items={wishlistItems}
-                onClose={() => dispatch(toggleWishlistDrawer())}
-                onAddToCart={handleAddToCart}
-                onRemove={(id) => dispatch(toggleWishlist({ id }))}
-                onAddAllToCart={() => { wishlistItems.forEach((item) => dispatch(addToCart(item))); dispatch(toggleWishlistDrawer()); }}
-            />
-
-            <QuickViewModal
-                product={quickViewProduct}
-                onClose={() => setQuickViewProduct(null)}
-                onAddToCart={handleAddToCart}
-                onViewDetails={(p) => { dispatch(setSelectedProductId(p.id)); dispatch(setView('DETAILS')); setQuickViewProduct(null); }}
-            />
-
-            <WhatsAppButton />
-
-            {toast && (
-                <div className="fixed bottom-10 right-1/2 translate-x-1/2 md:right-10 md:translate-x-0 z-[300] w-[90%] max-w-[400px] animate-in slide-in-from-bottom-5 duration-500">
-                    <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl rounded-[2.5rem] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] border border-white dark:border-slate-800 p-6 overflow-hidden relative group">
-                        <div className="flex items-center gap-5 relative z-10">
-                            <div className={`size-14 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-lg ${toast.type === 'success' ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-emerald-500/20' :
-                                toast.type === 'error' ? 'bg-gradient-to-br from-rose-500 to-rose-700 shadow-rose-500/20' :
-                                    'bg-gradient-to-br from-blue-500 to-indigo-700 shadow-blue-500/20'
-                                }`}>
-                                {toast.type === 'success' ? <CheckCircle2 className="size-6" /> :
-                                    toast.type === 'error' ? <X className="size-6" /> :
-                                        <Info className="size-6" />}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <h4 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${toast.type === 'success' ? 'text-emerald-600' :
-                                    toast.type === 'error' ? 'text-rose-600' :
-                                        'text-blue-600'
-                                    }`}>
-                                    {toast.type === 'success' ? 'Succès' :
-                                        toast.type === 'error' ? 'Attention' :
-                                            'Information'}
-                                </h4>
-                                <p className="text-[13px] font-black text-slate-800 dark:text-white leading-tight">
-                                    {toast.msg || toast.message}
-                                </p>
-                            </div>
-                            <button
-                                onClick={() => dispatch(setToast(null))}
-                                className="size-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all transform hover:rotate-90"
-                            >
-                                <X className="size-4" />
-                            </button>
-                        </div>
-
-                        {/* Progress Bar Container */}
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-100 dark:bg-slate-800">
-                            <div className={`h-full animate-toast-progress ${toast.type === 'success' ? 'bg-emerald-500' :
-                                toast.type === 'error' ? 'bg-rose-500' :
-                                    'bg-blue-600'
-                                }`}></div>
-                        </div>
-
-                        {/* Background subtle glow */}
-                        <div className={`absolute -right-4 -top-4 size-24 blur-3xl opacity-20 pointer-events-none ${toast.type === 'success' ? 'bg-emerald-500' :
-                            toast.type === 'error' ? 'bg-rose-500' :
-                                'bg-blue-600'
-                            }`}></div>
-                    </div>
-                </div>
-            )}
-
-            <main className="flex-grow pt-24">{renderContent()}</main>
+            <main className="flex-grow pt-24">
+                <ContentRouter
+                    view={view} loading={loading} auth={auth} prods={prods} wishes={wishes}
+                    comps={comps} items={items} allO={allO} selP={selP} searchQuery={searchQuery}
+                    activeCategory={activeCategory} activeBrand={activeBrand} filts={filts}
+                    last={last} handleAddToCart={handleAddToCart} handleGoHome={handleGoHome}
+                    setQuick={setQuick} setLast={setLast} dispatch={dispatch}
+                    setActiveCategory={setActiveCategory} setActiveBrand={setActiveBrand}
+                    setView={setView} setSelectedProductId={setSelectedProductId}
+                    updateProducts={updateProducts} updateOrderStatus={updateOrderStatus}
+                    deleteReview={deleteReview} clearCart={clearCart}
+                    toggleWishlist={toggleWishlist} toggleCompare={toggleCompare}
+                />
+            </main>
 
             <Footer
                 onAboutClick={() => dispatch(setView('ABOUT'))}

@@ -6,7 +6,7 @@ const WhatsAppButton = () => {
     <div className="fixed bottom-6 left-6 z-[150]">
       {/* WhatsApp Link */}
       <a
-        href="https://wa.me/212600000000"
+        href="https://wa.me/212640154173"
         target="_blank"
         rel="noopener noreferrer"
         className="group relative block"

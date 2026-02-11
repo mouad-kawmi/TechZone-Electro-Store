@@ -1,7 +1,7 @@
 import React from 'react';
-import { X, ShoppingCart, Star, ShieldCheck, Truck, Cpu, HardDrive, Battery, Maximize2, Zap } from 'lucide-react';
+import { X, ShoppingCart, Star, ShieldCheck, Truck, Cpu, HardDrive, Battery, Maximize2, Zap, Heart } from 'lucide-react';
 
-const QuickViewModal = ({ product, onClose, onAddToCart, onViewDetails }) => {
+const QuickViewModal = ({ product, onClose, onAddToCart, onViewDetails, onToggleWishlist, wishlistItems = [] }) => {
   if (!product) return null;
 
   // Extract top specs for the elite density grid
@@ -116,19 +116,30 @@ const QuickViewModal = ({ product, onClose, onAddToCart, onViewDetails }) => {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <button
-                onClick={() => onAddToCart(product)}
-                className="flex-1 bg-slate-900 dark:bg-blue-600 text-white py-4 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-3 hover:bg-blue-600 transition-all shadow-xl shadow-slate-900/10 group overflow-hidden relative active:scale-95"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <ShoppingCart className="size-4 relative z-10" />
-                <span className="relative z-10">Ajouter au Panier</span>
-              </button>
+              <div className="flex-1 flex gap-2">
+                <button
+                  onClick={() => onAddToCart(product)}
+                  className="flex-1 bg-slate-900 dark:bg-blue-600 text-white py-4 rounded-xl font-black uppercase tracking-widest text-[9px] flex items-center justify-center gap-3 hover:bg-blue-600 transition-all shadow-xl shadow-slate-900/10 group overflow-hidden relative active:scale-95"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <ShoppingCart className="size-4 relative z-10" />
+                  <span className="relative z-10">Panier</span>
+                </button>
+                <button
+                  onClick={() => onToggleWishlist(product)}
+                  className={`size-12 rounded-xl flex items-center justify-center transition-all border ${wishlistItems.some(item => item.id === product.id)
+                    ? 'bg-rose-50 border-rose-200 text-rose-500'
+                    : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800 text-slate-400 hover:text-rose-500'
+                    }`}
+                >
+                  <Heart className={`size-5 ${wishlistItems.some(item => item.id === product.id) ? 'fill-current' : ''}`} />
+                </button>
+              </div>
               <button
                 onClick={() => onViewDetails(product)}
                 className="flex-1 border border-slate-200 dark:border-slate-800/80 text-slate-900 dark:text-white py-4 rounded-xl font-black uppercase tracking-widest text-[9px] hover:bg-slate-50 dark:hover:bg-slate-900 transition-all flex items-center justify-center gap-2 active:scale-95"
               >
-                Voir les Détails
+                Détails
               </button>
             </div>
           </div>
