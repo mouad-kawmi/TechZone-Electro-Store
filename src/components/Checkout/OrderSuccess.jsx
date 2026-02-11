@@ -7,6 +7,29 @@ const OrderSuccess = ({ onContinue, orderData, onTrack }) => {
   const customerName = orderData?.name || "Client Elite";
   const containerRef = useRef(null);
 
+  const handleDownload = () => {
+    window.print(); // Easy and professional for a receipt
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: 'Ma Commande TechZone',
+      text: `J'ai commandé chez TechZone Elite ! Mon numéro de commande est : ${orderNumber}`,
+      url: window.location.origin
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.text);
+        alert("Numéro de commande copié !");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline();
@@ -90,11 +113,19 @@ const OrderSuccess = ({ onContinue, orderData, onTrack }) => {
               <p className="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">{orderNumber}</p>
             </div>
             <div className="flex gap-3">
-              <button className="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-blue-600 transition-all shadow-sm">
-                <Download className="h-5 w-5" />
+              <button
+                onClick={handleDownload}
+                className="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-blue-600 transition-all shadow-sm group"
+                title="Imprimer le reçu"
+              >
+                <Download className="h-5 w-5 group-hover:-translate-y-1 transition-transform" />
               </button>
-              <button className="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-blue-600 transition-all shadow-sm">
-                <Share2 className="h-5 w-5" />
+              <button
+                onClick={handleShare}
+                className="p-4 bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-blue-600 transition-all shadow-sm group"
+                title="Partager"
+              >
+                <Share2 className="h-5 w-5 group-hover:scale-110 transition-transform" />
               </button>
             </div>
           </div>
