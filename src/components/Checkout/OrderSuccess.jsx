@@ -104,7 +104,28 @@ const OrderSuccess = ({ onContinue, orderData, onTrack }) => {
         </div>
 
         <h1 className="success-title text-4xl md:text-6xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-4">Commande Confirmée !</h1>
-        <p className="success-title text-slate-500 dark:text-slate-400 text-lg font-medium mb-12">Merci pour votre confiance {customerName}. Votre colis est déjà en route.</p>
+        <p className="success-title text-slate-500 dark:text-slate-400 text-lg font-medium mb-6">Merci pour votre confiance {customerName}. Votre colis est déjà en route.</p>
+
+        {/* ID Tracking Notice */}
+        <div className="success-title bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl p-6 mb-12 max-w-2xl mx-auto">
+          <p className="text-sm font-bold text-blue-900 dark:text-blue-100 mb-2">
+            📱 <span className="font-black">Gardez cet ID pour suivre votre commande:</span>
+          </p>
+          <div className="flex items-center justify-center gap-3 mt-3">
+            <code className="text-2xl font-black text-blue-600 dark:text-blue-400 bg-white dark:bg-slate-800 px-6 py-3 rounded-xl border-2 border-blue-300 dark:border-blue-700">
+              {orderNumber}
+            </code>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(orderNumber);
+                alert('ID copié !');
+              }}
+              className="px-4 py-3 bg-blue-600 text-white rounded-xl text-xs font-black hover:bg-blue-700 transition-all"
+            >
+              COPIER
+            </button>
+          </div>
+        </div>
 
         <div className="success-card bg-slate-50 dark:bg-slate-900 rounded-[3.5rem] p-10 md:p-14 border border-slate-100 dark:border-slate-800 mb-12 text-left shadow-2xl shadow-slate-900/5">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10 pb-10 border-b border-slate-200 dark:border-slate-800">

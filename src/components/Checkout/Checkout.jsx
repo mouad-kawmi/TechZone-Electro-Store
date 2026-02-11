@@ -47,6 +47,8 @@ const Checkout = ({ items, onBack, onConfirm }) => {
     const orderData = {
       id: orderId,
       userId: user?.id || null,
+      customerName: formData.name,
+      email: user?.email || 'guest@techzone.ma',
       ...formData,
       items,
       finalTotal: total,
@@ -57,6 +59,9 @@ const Checkout = ({ items, onBack, onConfirm }) => {
       status: 'En Cours'
     };
 
+    console.log('🎯 Nouvelle commande créée:', orderId);
+    console.log('📦 Order Data:', orderData);
+
     setTimeout(() => {
       dispatch(addNotification({
         type: 'order',
@@ -66,6 +71,8 @@ const Checkout = ({ items, onBack, onConfirm }) => {
       }));
 
       dispatch(addOrder(orderData));
+      console.log('✅ Commande ajoutée au store Redux');
+
       onConfirm(orderData);
       setIsSubmitting(false);
     }, 2000);
