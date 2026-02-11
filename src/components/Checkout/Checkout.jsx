@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addNotification } from '../../store/slices/notificationsSlice';
+import { addOrder } from '../../store/slices/ordersSlice';
 import { CreditCard, Wallet, User, CheckCircle2, Landmark } from 'lucide-react';
 
 // Parts
@@ -42,6 +43,20 @@ const Checkout = ({ items, onBack, onConfirm }) => {
 
   const handleConfirm = () => {
     setIsSubmitting(true);
+    const orderId = "TZ-" + Math.floor(Math.random() * 900000 + 100000);
+    const orderData = {
+      id: orderId,
+      userId: user?.id || null,
+      ...formData,
+      items,
+      finalTotal: total,
+      amount: total,
+      appliedDiscount: discount,
+      paymentMethod,
+      date: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }),
+      status: 'En Cours'
+    };
+
     setTimeout(() => {
       dispatch(addNotification({
         type: 'order',
@@ -50,13 +65,8 @@ const Checkout = ({ items, onBack, onConfirm }) => {
         link: '/admin/orders'
       }));
 
-      onConfirm({
-        ...formData,
-        items,
-        finalTotal: total,
-        appliedDiscount: discount,
-        paymentMethod
-      });
+      dispatch(addOrder(orderData));
+      onConfirm(orderData);
       setIsSubmitting(false);
     }, 2000);
   };
